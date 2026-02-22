@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Lost</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: url('/images/green-gingham.png');
+      background-color: #c8e6c8;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+    
+    .disco-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      animation: disco 2.5s infinite;
+      opacity: 0.3;
+    }
+    
+    @keyframes disco {
+      0% { background-color: #ff6b6b; }
+      20% { background-color: #4ecdc4; }
+      40% { background-color: #ffe66d; }
+      60% { background-color: #95e1d3; }
+      80% { background-color: #f38181; }
+      100% { background-color: #ff6b6b; }
+    }
+    
+    .content {
+      text-align: center;
+      color: #ff69b4;
+      font-size: 2rem;
+      z-index: 10;
+      position: relative;
+    }
+    
+    a {
+      color: #2145E8;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="disco-overlay"></div>
+  <div class="content">
+    <p>you are lost........ error...... but you can be found</p>
+    <a href="/index.html">go home</a>
+  </div>
+</body>
+</html>

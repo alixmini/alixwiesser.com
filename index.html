@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>alixwiesser.com</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Crimson+Text:wght@400;600;700&family=Patrick+Hand&family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!--
+
+       \    /\
+        )  ( ')
+       (  /  )
+      \(__)|
+      
+    ═══════════════════════════════
+    ╭──────────༺♡༻──────────╮
+    
+       boo! I see you.
+       welcome to the secret!
+       
+       pssst... konami lurks
+       on the landing page
+    
+    ╰──────────༺♡༻──────────╯
+    ═══════════════════════════════
+    
+        /\    /
+       (' )  (
+       (  \  )
+        |(__)/
+
+  -->
+  <div id="curtain-overlay"></div>
+  <div class="frame landing">
+    <main class="landing-content">
+      <img src="images/header-logo.png?v=1770315599" alt="Alix Wiesser" class="header-logo">
+      
+      <nav class="icon-row">
+        <a href="https://www.are.na/alix-wiesser/books-i-would-have-everybody-read-if-i-were-king-of-the-world" target="_blank" rel="noopener"><img src="images/booklogo-button.png" alt="Writing" class="icon-button"></a>
+        <a href="https://alixwiesser.tumblr.com/" target="_blank" rel="noopener"><img src="images/cameralogo-button.png" alt="Film Photography" class="icon-button"></a>
+        <a href="cottage.html"><img src="images/cottagelogo-button.png" alt="Cottage" class="icon-button"></a>
+        <a href="https://twitter.com/alixwiessser" target="_blank" rel="noopener"><img src="images/twitterlogo-button.png" alt="Twitter" class="icon-button"></a>
+        <a href="mailto:alixgwiesser@gmail.com"><img src="images/emaillogo-button.png" alt="Email" class="icon-button"></a>
+      </nav>
+      
+      <nav class="category-row">
+        <a href="internet.html"><img src="images/internet-button.png" alt="Internet" class="category-button"></a>
+        <a href="irl.html"><img src="images/irl-button.png" alt="IRL" class="category-button"></a>
+        <a href="making.html"><img src="images/making-button.png" alt="Making" class="category-button"></a>
+      </nav>
+      
+      <div class="cat-photo-link" id="cat-link">
+        <img src="images/alixwithcats.png?v=1770315599" alt="" class="cat-photo" id="cat-photo">
+      </div>
+    </main>
+  </div>
+  <script src="scripts/project-links.js"></script>
+  <script>
+    // Cat photo click toggle animation
+    document.addEventListener('DOMContentLoaded', function(){
+      var catLink = document.getElementById('cat-link');
+      var catPhoto = document.getElementById('cat-photo');
+      var isClicked = false;
+      if(catLink && catPhoto){
+        catLink.addEventListener('click', function(e){
+          e.preventDefault();
+          if(isClicked){
+            catPhoto.src = 'images/alixwithcats.png?v=1770315599';
+          } else {
+            catPhoto.src = 'images/alixwithcats-click.png?v=1770315599';
+          }
+          isClicked = !isClicked;
+        });
+      }
+    });
+  </script>
+  <script>
+    // feeling-lucky: navigate to a random project from the explicit list
+    (function(){
+      var pages = [
+        '/internet/tmmtou.html',
+        '/internet/old-site.html',
+        '/internet/writing.html',
+        '/internet/bookbound.html',
+        '/internet/21-bday-vid.html',
+        '/internet/22-bday-vid.html',
+        '/internet/23-bday-vid.html',
+        '/irl/cny-2025.html',
+        '/irl/cny-2026.html',
+        '/irl/galentines.html',
+        '/irl/bday-brunch.html',
+        '/irl/half-marathon.html',
+        '/irl/rag.html',
+        '/irl/foc.html',
+        '/irl/london-good.html',
+        '/irl/dance.html',
+        '/irl/christmas-hampers.html',
+        '/making/film-photography.html',
+        '/making/posters.html',
+        '/making/painting.html',
+        '/making/flyers.html',
+        '/making/lighter-magnets.html',
+        '/making/rothko.html',
+        '/making/cereal-box.html'
+      ];
+
+      document.addEventListener('DOMContentLoaded', function(){
+        var btn = document.getElementById('feeling-lucky');
+        if(!btn) return;
+        btn.addEventListener('click', function(e){
+          e.preventDefault();
+          var p = pages[Math.floor(Math.random()*pages.length)];
+          // navigate relative to site root
+          window.location.href = p;
+        });
+      });
+    })();
+  </script>
+  <script>
+    (function(){
+      var curtain = document.getElementById('curtain-overlay');
+      if(!curtain) return;
+      curtain.addEventListener('animationend', function(){
+        curtain.classList.add('done');
+      });
+    })();
+  </script>
+  <div id="disco-overlay"></div>
+  <script>
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === konamiCode[konamiIndex]) {
+    konamiIndex++;
+    if (konamiIndex === konamiCode.length) {
+      const disco = document.getElementById('disco-overlay');
+      disco.classList.add('active');
+      console.log("%c🕺 DISCO MODE ACTIVATED 🕺", "font-size: 24px; color: hotpink; font-weight: bold;");
+      
+      setTimeout(() => {
+        disco.classList.remove('active');
+      }, 8000);
+      
+      konamiIndex = 0;
+    }
+  } else {
+    konamiIndex = 0;
+  }
+});
+  </script>
+</body>
+</html>

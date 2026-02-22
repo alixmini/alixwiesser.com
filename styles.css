@@ -1,0 +1,1040 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
+/* Text selection highlight */
+::selection {
+  background-color: #c8e6c8;
+  color: inherit;
+}
+
+::-moz-selection {
+  background-color: #c8e6c8;
+  color: inherit;
+}
+
+@font-face {
+  font-family: 'Rediviva';
+  src: url('../fonts/Rediviva.ttf') format('truetype'),
+       url('/fonts/Rediviva.ttf') format('truetype'),
+       url('fonts/Rediviva.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root{
+  --bg: #fff0f5;
+  --primary: #32CD32; /* fluorescent green (primary) */
+  --primary-dark: #28b428;
+  --accent: #15803d; /* dark green (secondary / visited) */
+  --text: #33393f; /* charcoal gray */
+  --muted: #e6e6e6;
+  --max-width: 940px;
+}
+
+*{box-sizing:border-box}
+html, body{min-height:100%; margin:0; padding:0;}
+body{
+  font-family: 'Roboto Condensed', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--bg);
+  background-image: url('images/background.jpeg?v=1770420000');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  font-weight:400;
+}
+
+.frame{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  margin:14px;
+  border-radius:8px;
+}
+
+/* Project page content box */
+.frame:not(.landing) {
+  background-color: #FEB2DC;
+  border: 4px solid #2145E8;
+  max-width: 800px;
+  margin-top: 80px;
+  margin-bottom: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 50px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+/* Home logo in top left */
+.home-logo {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+}
+
+.home-logo img {
+  height: 50px;
+  width: auto;
+  transition: transform 0.2s ease;
+}
+
+.home-logo img:hover {
+  transform: scale(1.05);
+}
+
+/* Back link in top left of card */
+.back-link {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: auto;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #2145E8;
+  text-decoration: none;
+  padding: 8px 18px;
+  background: transparent;
+  border: 2px solid #2145E8;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.back-link:hover {
+  background: #c8e6c8;
+  color: #2145E8;
+}
+
+/* Project title centered */
+.project-title {
+  font-family: 'Cormorant Garamond', 'Adobe Caslon Pro', 'Crimson Text', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 25px;
+  margin-top: 0;
+  color: #2145E8;
+  background-color: #c8e6c8;
+  display: inline;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 2px solid #2145E8;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  line-height: 1.5;
+}
+
+/* Drop cap styling */
+.drop-cap {
+  font-family: 'Rediviva', serif !important;
+  font-size: 4.5rem;
+  float: left;
+  line-height: 0.7;
+  padding-right: 12px;
+  padding-top: 0;
+  margin-top: 5px;
+  color: #222;
+}
+
+/* Make sure the first paragraph doesn't have extra margin that breaks the flow */
+.project-content p:first-of-type,
+.content-card p:first-of-type,
+.dropcap p:first-of-type {
+  margin-top: 0;
+}
+
+/* Clear the float after the first paragraph */
+.project-content p:first-of-type::after,
+.content-card p:first-of-type::after,
+.dropcap p:first-of-type::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Project body text */
+.project-content p,
+.project-content li,
+.content-card p,
+.content-card li,
+.center p,
+.dropcap p,
+.dropcap ul,
+.dropcap ol,
+.dropcap li {
+  font-family: 'Cormorant Garamond', 'Adobe Caslon Pro', 'Crimson Text', Georgia, serif;
+  color: #2d2d2d;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* Callout box with left border */
+.callout,
+.callout ol,
+.callout ul,
+.callout li {
+  font-family: 'Cormorant Garamond', 'Adobe Caslon Pro', 'Crimson Text', Georgia, serif;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #2d2d2d;
+}
+
+.callout {
+  border-left: 4px solid #2145E8;
+  padding-left: 20px;
+  margin: 20px 0;
+  margin-left: 10px;
+}
+
+.callout ol,
+.callout ul {
+  margin: 0;
+}
+
+.callout li {
+  margin-bottom: 8px;
+}
+
+  line-height: 1.7;
+  color: #333;
+}
+
+/* Prev/Next navigation */
+.prev-next-nav,
+.pager {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+  gap: 15px;
+}
+
+.prev-next-nav a,
+.pager a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #555;
+  text-decoration: none;
+  padding: 10px 22px;
+  background: white;
+  border: 2px solid #333;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.prev-next-nav a:hover,
+.pager a:hover {
+  background: #333;
+  color: white;
+}
+
+/* Project pages: align header left so back link sits top-left inside the pink card */
+.frame:not(.landing) .top{ text-align:left }
+
+/* Landing page tweaks: keep block centered horizontally, closer to top, tighter spacing */
+.frame.landing{
+  position:relative;
+  justify-content:flex-start;
+  padding: 12px 20px;
+  /* reserve space at the bottom so the illustration sits below content */
+  padding-bottom:200px;
+  margin:0;
+  max-height:100vh;
+  overflow:hidden;
+  border:none;
+  box-shadow:none;
+  border-radius:8px;
+}
+.frame.landing.category-page{ border:none; padding-bottom:80px; padding-top:80px; overflow:visible }
+.frame.landing .top,
+.frame.landing .center{ text-align:center }
+.frame.landing .center{ margin:0 auto }
+.frame.landing .welcome{ color:#000 }
+
+.top{ text-align:center; margin-bottom:4px; width:100%; max-width:var(--max-width) }
+.welcome{
+  font-size:48px;
+  margin:0 0 2px 0;
+  letter-spacing:-0.6px;
+  color:var(--text);
+  font-weight:900; /* extra bold header */
+  line-height:0.95;
+  display:inline-block;
+  /* subtle fluorescent highlight under the title */
+  background-image: linear-gradient(to bottom, transparent 70%, rgba(50,205,50,0.12) 70%);
+  padding-bottom:2px;
+}
+.welcome-logo{
+  max-width: 500px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 8px;
+}
+.tagline{ margin:0 0 24px 0; font-size:13px; color: #6b6f73 }
+
+.center{
+  width:100%;
+  max-width:var(--max-width);
+  text-align:left;
+}
+
+.intro{ font-size:16px; line-height:1.3; max-width:740px; margin:8px auto }
+.intro-image{ max-width:500px; width:100%; height:auto; display:block; margin:12px auto }
+.intro, .center a{ letter-spacing:-0.2px }
+.intro a{ color:var(--primary); text-decoration: none; font-weight:700 }
+
+/* Project page hyperlink styling */
+.project-content a,
+.content-card a,
+.center a,
+.dropcap a {
+  color: inherit;
+  text-decoration: underline;
+  background-color: #c8e6c8;
+  padding: 1px 3px;
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+}
+
+.project-content a:hover,
+.content-card a:hover,
+.center a:hover,
+.dropcap a:hover {
+  background-color: #a8d4a8;
+}
+
+.project-content a:visited,
+.content-card a:visited,
+.center a:visited,
+.dropcap a:visited {
+  color: inherit;
+}
+
+.actions{ margin:6px auto; font-size:15px; max-width:740px; text-align:center }
+.actions a{ color:var(--primary); text-decoration: none; padding:6px 8px; border-radius:6px }
+.actions a:hover{ color: #333; background: #ffb6c1 }
+
+
+.nav{ display:flex; gap:18px; justify-content:center; margin:8px auto; width:auto; max-width:720px }
+.nav-item{
+  display:inline-block;
+  padding:8px 14px;
+  text-align:center;
+  font-weight:900;
+  text-decoration: none;
+  color:var(--primary);
+  border:1px solid var(--primary);
+  border-radius:8px;
+  transition:transform .12s ease, color .12s ease, background .12s ease;
+}
+.nav-item:hover{ transform:translateY(-2px); color: #333; background: #ffb6c1 }
+
+/* Center nav on landing */
+.frame.landing .nav{ justify-content:center }
+
+/* Landing page layout */
+.landing-content{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px 20px 40px;
+  gap:25px;
+}
+
+.header-logo{
+  max-width:575px;
+  width:80%;
+  height:auto;
+  transition:transform .2s ease;
+}
+
+.header-logo:hover{
+  transform:rotate(10deg);
+}
+
+.icon-row{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.icon-button{
+  height:66px;
+  width:auto;
+  cursor:pointer;
+  transition:transform .1s ease;
+}
+
+.icon-button:hover{
+  transform:scale(1.1);
+}
+
+.category-row{
+  display:flex;
+  justify-content:center;
+  gap:25px;
+  flex-wrap:wrap;
+}
+
+.category-button{
+  height:100px;
+  width:auto;
+  cursor:pointer;
+  transition:transform .1s ease;
+}
+
+.category-button:hover{
+  transform:scale(1.05);
+}
+
+.cat-photo-link{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.cat-photo{
+  max-width:540px;
+  width:90vw;
+  height:auto;
+  display:block;
+  transition:transform .3s ease;
+}
+
+.cat-photo:hover{
+  transform:rotate(15deg) scale(1.05);
+}
+
+.sub-nav{ display:flex; gap:16px; width:auto; max-width:720px; margin:6px auto; justify-content:center }
+.sub-nav a{ color:var(--primary); text-decoration: none; font-size:14px }
+.sub-box{ display:inline-block; padding:6px 10px; border:1px solid var(--primary); border-radius:6px; font-weight:700 }
+.sub-box:hover{ color: #333; background: #ffb6c1 }
+.frame.landing .sub-nav{ justify-content:center }
+
+.illustration{ position:absolute; left:50%; transform:translateX(-50%); bottom:0; display:flex; justify-content:center; width:100%; z-index:0; pointer-events:auto }
+.illustration-link{ cursor:pointer; display:block }
+.illustration-img{ width:598px; max-width:95vw; height:auto; display:block; box-shadow:none; border:none; transition:transform .3s ease; max-height:85vh }
+.illustration-img:hover{ transform:rotate(15deg) scale(1.05); }
+
+/* make sure content layers above the illustration */
+.frame.landing .top,
+.frame.landing .center,
+.frame.landing .foot{ position:relative; z-index:2 }
+
+.foot{ margin-top:10px; margin-bottom:60px; font-size:13px; color:#6b6f73 }
+.foot a{ color:var(--primary); text-decoration: none }
+.foot a:hover{ color: #ff69b4; text-decoration: none }
+.find-me{ max-width:920px; margin:8px auto; font-size:12px; color:#8b8f94; text-align:center }
+
+.sep{ margin:0 8px; color:#c3c6c9 }
+
+@media (max-width:520px){
+  .welcome{ font-size:28px; text-align:center; display:block }
+  .nav{ gap:14px; justify-content:center }
+  .nav-item{ font-size:16px }
+  .frame{ padding:18px }
+  .center{ text-align:center }
+  .landing-content{ padding:10px 10px 20px; gap:18px }
+  .header-logo{ max-width:345px; width:90% }
+  .icon-row{ gap:15px }
+  .icon-button{ height:55px }
+  .category-row{ gap:15px }
+  .category-button{ height:80px }
+  .cat-photo{ max-width:473px; width:95vw }
+}
+
+/* Category grid and cards */
+.grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); grid-auto-rows: 20px; gap:20px; margin-top:8px }
+.card{ display:block; text-decoration:none; color:var(--text); grid-row-end: span 1 }
+.card-image{ background:#fff; border:2px dashed var(--muted); min-height:200px; display:block }
+.card-image img{ width:100%; height:100%; object-fit:cover; display:block }
+.card-title{ margin-top:10px; font-weight:700; color:var(--text); text-align:left }
+
+@media (max-width:900px){
+  .grid{ grid-template-columns:repeat(2,1fr) }
+}
+@media (max-width:520px){
+  .grid{ grid-template-columns:repeat(1,1fr) }
+}
+
+/* Project page styles */
+.project-page{ padding-top:6px }
+.project-title{ font-size:34px; margin:6px 0 6px }
+.project-content{ font-family: 'Roboto Condensed', system-ui; line-height:1.6; color:var(--text) }
+.project-content p{ margin:14px 0 }
+.project-image-placeholder{ width:600px; max-width:95%; height:260px; border:2px dashed var(--muted); margin:12px auto; background:#fff }
+.project-image-placeholder.small{ height:140px }
+
+/* Embed container for Instagram, YouTube, Strava */
+.embed-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 30px auto;
+  max-width: 450px;
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+  border: none;
+}
+
+/* Instagram wrapper with blue border */
+.instagram-wrapper {
+  border: 2px solid #2145E8;
+  border-radius: 10px;
+  overflow: hidden;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+/* YouTube embeds with blue border */
+.embed-container iframe[src*="youtube"],
+.embed-container iframe[src*="youtu.be"],
+iframe[src*="youtube"],
+iframe[src*="youtu.be"] {
+  border: 2px solid #2145E8 !important;
+  border-radius: 10px !important;
+}
+
+.embed-container iframe,
+.embed-container .instagram-media {
+  margin: 0 auto !important;
+  max-width: 100% !important;
+  border-radius: 0;
+}
+
+/* Remove all borders and shadows from Instagram embeds */
+.instagram-media,
+.embed-container iframe,
+.embed-container blockquote {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Override Instagram's default styling */
+.instagram-media-rendered {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide Instagram's default chrome/buttons if possible */
+.instagram-media {
+  background: transparent !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 auto !important;
+}
+
+/* Try to hide the Instagram header/footer UI elements */
+.instagram-media > div:first-child,
+.instagram-media > div:last-child,
+.instagram-media header,
+.instagram-media footer {
+  display: none !important;
+}
+
+/* Hide Instagram padding/whitespace */
+.instagram-media > div {
+  padding: 0 !important;
+}
+
+/* Center Twitter/X embeds */
+.twitter-tweet {
+  margin: 0 !important;
+}
+
+.embed-container .twitter-tweet-rendered {
+  margin: 0 auto !important;
+}
+
+/* Twitter embeds with blue border */
+.twitter-tweet,
+.twitter-tweet-rendered,
+[class*="twitter"] iframe {
+  border: 2px solid #2145E8 !important;
+  border-radius: 10px !important;
+}
+
+/* Styled video/link buttons */
+.video-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #c8e6c8;
+  color: #2145E8;
+  text-decoration: none;
+  border: 2px solid #2145E8;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.video-link:hover {
+  background-color: #a8d4a8;
+}
+
+/* Center all images and media on project pages */
+.project-content img,
+.content-card img,
+.project-content iframe,
+.content-card iframe {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+}
+
+/* Center media containers */
+.media-container,
+.image-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 20px 0;
+}
+
+/* Drop cap using ::first-letter would be ideal but we include .drop span for control */
+.project-content p:first-of-type::first-letter{ float:left; font-family: 'Cinzel Decorative', serif; font-weight:700; font-size:4em; line-height:0.8; padding-right:8px; color:#000 }
+
+.pager{ display:flex; justify-content:space-between; margin:18px 0 }
+.pager a{ color:var(--accent); text-decoration:underline }
+
+.back{ 
+  color: #2145E8; 
+  text-decoration: none; 
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+.back:hover{ 
+  background-color: #c8e6c8;
+}
+
+.back span {
+  color: #2145E8;
+}
+
+.back:hover span {
+  color: #2145E8;
+}
+
+.category-title{ font-size:32px; margin:6px 0; text-align:center }
+.category-intro{ margin:0 0 8px 0; color:#6b6f73; line-height:1.45 }
+/* Slightly stronger category headings */
+.category-title{ font-weight:900 }
+
+/* Project page styles */
+body > header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px 40px;
+  max-width: 100%;
+  margin-bottom: 30px;
+}
+
+/* Place logo on the left and push the back/category link to the right */
+body > header img.home-icon { order: 0; margin-right: 12px }
+body > header a:first-child { order: 1; margin-left: auto; color: var(--text); text-decoration: none; font-weight:700; font-size:14px }
+body > header a:first-child:hover { color: var(--accent) }
+
+.home-icon {
+  height: 60px;
+  width: auto;
+  max-width: 200px;
+  border-radius: 4px;
+  display: block;
+}
+
+body > main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 40px;
+  text-align: center;
+}
+
+body > main h1 {
+  font-size: 36px;
+  margin: 0 0 30px 0;
+  color: var(--text);
+}
+
+.image-placeholder {
+  width: 600px;
+  max-width: 100%;
+  height: 260px;
+  border: 2px dashed var(--muted);
+  background: #fff;
+  margin: 30px auto;
+}
+
+.dropcap {
+  text-align: left;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 30px 0;
+}
+
+/* Lace curtain stop-motion overlay
+   Plays once on page load, then hides itself */
+#curtain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  /* Scale to fill viewport and align to top */
+  background-size: 100% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-image: url('images/Curtain frame 1.png?v=2');
+  animation: curtain-open 1.2s steps(1) 0.3s forwards;
+}
+
+@keyframes curtain-open {
+  0% { background-image: url('images/Curtain frame 1.png?v=2'); background-size: 100% 100%; background-position: 0 0; }
+  25% { background-image: url('images/Curtain frame 3.png?v=2'); background-size: 100% 100%; background-position: 0 0; }
+  50% { background-image: url('images/Curtain frame 5.png?v=2'); background-size: 100% 100%; background-position: 0 0; }
+  75% { background-image: url('images/Curtain frame 7.png?v=2'); background-size: 100% 100%; background-position: 0 0; }
+  /* Final frame stays visible (use frame 7 as the final still) */
+  100% { background-image: url('images/Curtain frame 7.png?v=2'); background-size: 100% 100%; background-position: 0 0; }
+}
+
+/* Konami code disco overlay */
+#disco-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.3;
+  animation: disco 1s infinite;
+}
+
+#disco-overlay.active {
+  display: block;
+}
+
+@keyframes disco {
+  0% { background-color: #ff006e; }
+  25% { background-color: #8338ec; }
+  50% { background-color: #3a86ff; }
+  75% { background-color: #06d6a0; }
+  100% { background-color: #ffbe0b; }
+}
+
+  @media (max-width:520px){
+    #curtain-overlay{ 
+      background-size: cover;
+    }
+  }
+  }
+
+/* after animation, hide the overlay completely */
+#curtain-overlay.done {
+  display: none;
+  visibility: hidden;
+}
+
+/* Static side curtains - decorative frame */
+.side-curtain {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 20vw;
+  max-width: 300px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 1;
+}
+
+#curtain-left {
+  left: 0;
+  background-image: url('images/Curtain frame 7.png?v=2');
+  background-position: left center;
+}
+
+#curtain-right {
+  right: 0;
+  background-image: url('images/Curtain frame 7.png?v=2');
+  background-position: right center;
+  transform: scaleX(-1);
+}
+
+/* Hide side curtains on smaller screens */
+@media (max-width: 1024px) {
+  .side-curtain {
+    display: none;
+  }
+}
+
+.link-buttons {
+  margin: 30px 0;
+  text-align: center;
+}
+
+.button {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  color: var(--primary);
+  text-decoration: underline wavy var(--primary);
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  color: var(--primary-dark);
+  background: rgba(50, 205, 50, 0.06);
+}
+
+.project-nav {
+  display: flex;
+  justify-content: space-between;
+  max-width: 600px;
+  margin: 50px auto 0;
+  padding: 0 40px;
+}
+
+.project-nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.project-nav a:hover {
+  color: var(--accent);
+}
+
+/* Category page header and auto-grid */
+.home-icon-top{
+  position:fixed;
+  top:20px;
+  left:20px;
+  right:auto;
+  z-index:9999;
+  display:block;
+}
+.home-icon-top img {
+  height: 60px;
+  width: auto;
+  max-width: 200px;
+}
+.category-header{ 
+  display:block !important; 
+  max-width:218px; 
+  width:44%; 
+  height:auto; 
+  margin:18px auto 45px !important; 
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Force center the header container on category pages */
+.frame.landing.category-page .top,
+.frame.landing.category-page header {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.category-grid{
+  column-count:3;
+  column-gap:8px;
+  margin-top:8px;
+}
+.category-item{
+  display:inline-block;
+  width:100%;
+  margin-bottom:8px;
+  break-inside:avoid;
+  text-decoration: none;
+  color: var(--text);
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+.category-item:hover {
+  background-color: transparent !important;
+}
+.category-item img{
+  width:80%;
+  height:auto;
+  display:block;
+  margin:0 auto;
+  border-radius:6px;
+  transition:transform .12s ease;
+  background-color: transparent !important;
+}
+}
+
+@media (max-width:900px){ .category-item{ flex: 0 0 calc(50% - 10px) } }
+@media (max-width:520px){ .category-item{ flex: 0 0 calc(100% - 0px) } }
+
+/* subtle hover lift for gallery feel */
+.category-item:hover img{ transform:translateY(-2px) scale(1.02) rotate(-1deg) }
+
+/* Specific sizing for tmmtou image */
+.category-item img[src*="tmmtou.png"]{ width:64%; }
+
+/* Project page content card and media placeholder */
+.content-card{
+  position: relative;
+  background-color:#FEB2DC;
+  border: 4px solid #2145E8;
+  max-width:800px;
+  margin:40px auto;
+  padding:40px;
+  border-radius:10px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.06);
+}
+.media-placeholder{ width:100%; max-width:600px; height:360px; margin:18px auto; border:2px dashed rgba(0,0,0,0.12); display:flex; align-items:center; justify-content:center; color:#8b8f94; background:rgba(255,255,255,0.6) }
+.grid-placeholder{ width:100%; height:0; padding-bottom:66%; border:2px dashed rgba(0,0,0,0.12); display:block; background:rgba(255,255,255,0.6) }
+
+/* remove content-card styling on landing/category pages */
+.frame.landing .content-card, .frame .content-card.frame{ background:transparent; box-shadow:none; padding:0 }
+
+/* External CTA/link styles (small, secondary, opens in new tab) */
+.card-title + .external-link{ display:inline-block; margin-top:6px; margin-left:0; font-size:13px; color:var(--accent); text-decoration:underline }
+.external-link:hover{ color:var(--primary) }
+.external-cta-wrap{ margin:8px 0 }
+.external-cta{ display:inline-block; font-weight:700; color:var(--accent); text-decoration:underline }
+.external-cta:hover{ color:var(--primary) }
+
+/* Enforce left-aligned project content and drop-cap behaviour */
+.content-card, .frame .center article, .project-content, .dropcap {
+  text-align: left !important;
+}
+
+/* Center titles on project pages */
+.content-card h1,
+.content-card h2,
+.project-title,
+.card-title,
+.center h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 700 !important;
+  font-style: italic;
+  color: #2145E8;
+  background-color: #c8e6c8;
+  display: inline;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 2px solid #2145E8;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  line-height: 1.5;
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+/* Container needs to center the inline title */
+.center,
+.content-card header,
+.title-container,
+.project-title-wrapper {
+  text-align: center !important;
+  width: 100%;
+  display: block;
+}
+
+/* Header: back button aligned to left on project pages */
+.frame:not(.landing) .top { display: flex; justify-content: flex-start; align-items: center; gap: 12px; }
+.frame:not(.landing) .top .back { margin: 0; }
+.home-icon-top { left: 20px; right: auto; }
+
+/* Deep cuts prose content styling */
+.prose-content {
+  background-color: #c6fab6;
+  padding: 32px;
+  border-radius: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: 'Roboto Condensed', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.prose-content p {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 1.2rem;
+}
+
+.prose-content ul {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 1.2rem;
+}
+
+.deep-cut-section {
+  margin-bottom: 36px;
+}
+
+.deep-cut-section:last-child {
+  margin-bottom: 0;
+}
+
+.deep-cut-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 24px;
+}
+
+.deep-cut-section h3 a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 2px solid var(--primary);
+}
+
+.deep-cut-section h3 a:hover {
+  color: var(--primary-dark);
+}
+
+.deep-cut-section p {
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+/* Content images - no border styling */
+img.content-image {
+  border: none !important;
+  border-radius: 10px;
+  display: block;
+  margin: 20px auto;
+  max-width: 65%;
+}
