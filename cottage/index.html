@@ -1102,7 +1102,7 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
   }
 
   // --- TOILET / PEE / BATHROOM ---
-  if (room === 'bathroom')) {
+  if (room === 'bathroom') {
     if (cmdIncludes(cmd, 'pee', 'wee', 'urinate', 'use toilet', 'use loo', 'use bathroom', 'relieve')) {
       print("Well, that was nice. Now we get back to focusing on the task at hand!");
       return;
@@ -1203,7 +1203,7 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
     }
 
     // Generic book / shelf examine
-    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect' || verb === 'read' || verb === 'browse')) {
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect' || verb === 'read' || verb === 'browse') {
       print(`The books are arranged neatly, although they don't seem to be arranged in any specific way.
 
 You guess there are perhaps eighteen books at a glance, but you know if you stop and start reading any of them, that'll be a sure recipe for overstaying your welcome.
@@ -1218,7 +1218,7 @@ The Story of a New Name by Elena Ferrante`);
     }
 
     // Trying a book not on the list
-    if (verb === 'take' || verb === 'read' || verb === 'open')) {
+    if (verb === 'take' || verb === 'read' || verb === 'open') {
       print(randomCant());
       return;
     }
@@ -1263,7 +1263,7 @@ Welcome to the Guesthouse.`);
   }
 
   // --- DROP ---
-  if (verb === 'drop' || verb === 'put down')) {
+  if (verb === 'drop' || verb === 'put down') {
     if (rest && hasItem(rest)) {
       removeItem(rest);
       print(`You set the ${rest} down.`);
@@ -1274,7 +1274,7 @@ Welcome to the Guesthouse.`);
   }
 
   // --- USE (generic) ---
-  if (verb === 'use')) {
+  if (verb === 'use') {
     if (cmdIncludes(cmd, 'pen') && hasItem('pen') && hasItem('note')) {
       if (!state.noteRevealed) {
         state.noteRevealed = true;
@@ -1294,7 +1294,7 @@ Welcome to the Guesthouse.`);
   // ============================================================
 
   // "go [direction]" / "move [direction]" / "walk [direction]" / "head [direction]"
-  if (verb === 'go' || verb === 'move' || verb === 'walk' || verb === 'head' || verb === 'enter')) {
+  if (verb === 'go' || verb === 'move' || verb === 'walk' || verb === 'head' || verb === 'enter') {
     const dir = rest || '';
     if (dir && exits[dir]) {
       moveTo(exits[dir]);
@@ -1328,7 +1328,7 @@ Welcome to the Guesthouse.`);
   // ============================================================
   // TAKE (generic, if not caught above)
   // ============================================================
-  if (verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get')) {
+  if (verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get') {
     // Pen in foyer
     if (room === 'foyer' && cmdIncludes(cmd, 'pen', 'penlight', 'light')) {
       if (!hasItem('pen')) {
@@ -1424,7 +1424,7 @@ function submitName() {
 
 async function initChat() {
   // If Supabase credentials aren't configured, use a local-only fallback
-  if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL')) {
+  if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL') {
     addChatMessage('system', 'You solved The Cottage! Chatroom coming soon.', new Date());
     return;
   }
