@@ -899,7 +899,7 @@ function processCommand(rawInput) {
   // --- NOTE / PAPER (balcony) ---
   if (cmdIncludes(cmd, 'note', 'paper', 'message', 'crumple')) {
     // Examine / read note
-    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'read' || verb === 'inspect' || verb === 'open' || verb === 'uncrumple')) {
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'read' || verb === 'inspect' || verb === 'open' || verb === 'uncrumple') {
       if (room === 'balcony' || hasItem('note')) {
         if (state.noteRevealed) {
           print(`The paper reads: "ISBN9780571224128".`);
