@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Cottage</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1712;
+    --bg-lighter: #2a2520;
+    --text: #e8dcc8;
+    --text-dim: #9a8e7a;
+    --accent: #d4a056;
+    --accent-dim: #a07830;
+    --input-bg: #0f0d0a;
+    --green: #7ab87a;
+    --red: #c47a6a;
+
+    /* Chatroom theme */
+    --chat-bg: #050e0a;
+    --chat-bg-alt: #0b1a13;
+    --chat-pink: #f3a9c8;
+    --chat-pink-soft: #f7c2d9;
+    --chat-green: #c5f3c5;
+    --chat-muted: #7a9185;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: #c5f3c5;
+    font-family: 'JetBrains Mono', monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #game-header {
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--bg-lighter);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--chat-muted, #7a9185);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  #game-header .location {
+    color: #f3a9c8;
+    font-weight: 600;
+  }
+
+  #inventory-bar {
+    color: var(--chat-muted, #7a9185);
+  }
+
+  #output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    scroll-behavior: smooth;
+  }
+
+  #output::-webkit-scrollbar { width: 6px; }
+  #output::-webkit-scrollbar-track { background: var(--bg); }
+  #output::-webkit-scrollbar-thumb { background: var(--bg-lighter); border-radius: 3px; }
+
+  .message {
+    max-width: 720px;
+    margin: 0 auto 20px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    animation: fadeIn 0.3s ease;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    color: #c5f3c5;
+  }
+
+  .message.command {
+    color: #f7c2d9;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    opacity: 1;
+  }
+
+  .message.command::before {
+    content: '> ';
+    color: #f3a9c8;
+  }
+
+  .message.system {
+    color: #7a9185;
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  .message .room-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #f3a9c8;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #input-area {
+    border-top: 1px solid var(--bg-lighter);
+    padding: 16px 24px;
+    flex-shrink: 0;
+  }
+
+  #input-row {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #input-row::before {
+    content: '>';
+    font-family: 'JetBrains Mono', monospace;
+    color: #f3a9c8;
+    font-size: 1rem;
+  }
+
+  #command-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #c5f3c5;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    outline: none;
+    caret-color: #f3a9c8;
+  }
+
+  #command-input::placeholder {
+    color: #7a9185;
+    opacity: 0.7;
+  }
+
+  /* Chatroom styles */
+  #chatroom {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+    background: radial-gradient(circle at top, var(--chat-bg-alt) 0%, var(--chat-bg) 55%, #040806 100%);
+    color: var(--chat-green);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  #chatroom.active {
+    display: flex;
+  }
+
+  #chatroom.visible {
+    opacity: 1;
+  }
+
+  #game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: opacity 0.6s ease;
+  }
+
+  #game-container.hidden {
+    display: none;
+    opacity: 0;
+  }
+
+  #game-container.fade-out {
+    opacity: 0;
+  }
+
+  #chat-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid rgba(243, 169, 200, 0.16);
+    text-align: center;
+  }
+
+  #chat-header h2 {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--chat-pink);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  #chat-header p {
+    font-size: 0.8rem;
+    color: var(--chat-green);
+    max-width: 640px;
+    margin: 6px auto 0;
+    line-height: 1.5;
+  }
+
+  #chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  #chat-messages::-webkit-scrollbar { width: 6px; }
+  #chat-messages::-webkit-scrollbar-track { background: transparent; }
+  #chat-messages::-webkit-scrollbar-thumb { background: rgba(243, 169, 200, 0.3); border-radius: 3px; }
+
+  .chat-msg {
+    max-width: 720px;
+    margin: 0 auto 14px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .chat-msg .chat-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--chat-pink-soft);
+    margin-bottom: 2px;
+    letter-spacing: 0.04em;
+  }
+
+  .chat-msg .chat-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.03em;
+    color: var(--chat-green);
+  }
+
+  .chat-msg .chat-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--chat-muted);
+    margin-top: 2px;
+  }
+
+  /* System messages */
+  .chat-system {
+    text-align: center;
+    font-style: italic;
+    color: var(--chat-muted);
+  }
+
+  .chat-system .chat-name {
+    display: none;
+  }
+
+  .chat-system .chat-text {
+    color: var(--chat-muted);
+    font-style: italic;
+  }
+
+  /* Messages sent by the current player */
+  .chat-own .chat-name {
+    color: var(--chat-pink);
+  }
+
+  .chat-own .chat-text {
+    color: var(--chat-pink-soft);
+  }
+
+  #chat-input-area {
+    border-top: 1px solid rgba(243, 169, 200, 0.18);
+    padding: 16px 24px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+  }
+
+  #chat-input-row {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #chat-input {
+    flex: 1;
+    background: rgba(3, 12, 8, 0.95);
+    border: 1px solid rgba(243, 169, 200, 0.25);
+    border-radius: 999px;
+    color: var(--chat-green);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+
+  #chat-input::placeholder {
+    color: rgba(197, 243, 197, 0.35);
+  }
+
+  #chat-input:focus {
+    border-color: var(--chat-pink);
+    box-shadow: 0 0 0 1px rgba(243, 169, 200, 0.55);
+    background: rgba(4, 16, 10, 1);
+  }
+
+  #chat-send {
+    background: var(--chat-pink);
+    border: none;
+    color: #200b12;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+  }
+
+  #chat-send:hover {
+    background: #ffd2e5;
+    transform: translateY(-1px);
+  }
+
+  #chat-send:active {
+    transform: translateY(0);
+  }
+
+  /* Name modal */
+  #name-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #name-modal.active {
+    display: flex;
+  }
+
+  #name-modal-inner {
+    background: radial-gradient(circle at top, var(--chat-bg-alt) 0%, var(--chat-bg) 60%);
+    padding: 32px 28px 28px;
+    border-radius: 14px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(243, 169, 200, 0.35);
+  }
+
+  #name-modal-inner h3 {
+    color: var(--chat-pink);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  #name-modal-inner p {
+    color: var(--chat-green);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+
+  #name-input {
+    background: rgba(3, 12, 8, 0.95);
+    border: 1px solid rgba(243, 169, 200, 0.4);
+    border-radius: 999px;
+    color: var(--chat-green);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+    text-align: center;
+    margin-bottom: 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+
+  #name-input::placeholder {
+    color: rgba(197, 243, 197, 0.35);
+  }
+
+  #name-input:focus {
+    border-color: var(--chat-pink);
+    box-shadow: 0 0 0 1px rgba(243, 169, 200, 0.55);
+    background: rgba(4, 16, 10, 1);
+  }
+
+  #name-submit {
+    background: var(--chat-pink);
+    border: none;
+    color: #200b12;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  #name-submit:hover {
+    background: #ffd2e5;
+    transform: translateY(-1px);
+  }
+
+  #name-submit:active {
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- GAME -->
+<div id="game-container">
+  <div id="game-header">
+    <span>THE COTTAGE — <span class="location" id="location-display">The Great Forest</span></span>
+    <span id="inventory-bar">pockets: empty</span>
+  </div>
+  <div id="output"></div>
+  <div id="input-area">
+    <div id="input-row">
+      <input type="text" id="command-input" placeholder="what do you do?" autofocus autocomplete="off" spellcheck="false">
+    </div>
+  </div>
+</div>
+
+<!-- CHATROOM -->
+<div id="chatroom">
+  <div id="chat-header">
+    <h2>✧ The Guesthouse ✧</h2>
+    <p>You made it! But do you think you just fell out of a coconut tree? You exist in the context of all in which you live and what came before you. Leave a note for your fellow adventurers!</p>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-area">
+    <div id="chat-input-row">
+      <input type="text" id="chat-input" placeholder="say something..." autocomplete="off" spellcheck="false">
+      <button id="chat-send">send</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAME MODAL -->
+<div id="name-modal">
+  <div id="name-modal-inner">
+    <h3>Welcome to the Guesthouse!</h3>
+    <p>Name:</p>
+    <input type="text" id="name-input" placeholder="your name" maxlength="24" autocomplete="off" spellcheck="false">
+    <br>
+    <button id="name-submit">enter</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// THE COTTAGE — Full Game Engine
+// ============================================================
+
+// --- ROOMS ---
+const rooms = {
+  outside: {
+    name: "The Great Forest",
+    description: `You find yourself standing outside a small cottage.
+
+The front door is slightly ajar, and there's a ghost-scent of butter in the air.
+
+You step up to the doormat and shuffle your feet across like any polite guest would do.
+
+What's your next move?`,
+    exits: { go: "foyer", open: "foyer", door: "foyer", "in": "foyer", inside: "foyer", cottage: "foyer", entrance: "foyer", forward: "foyer", north: "foyer" }
+  },
+  foyer: {
+    name: "Foyer",
+    description: `You find yourself in a small foyer. It's neither warm nor chilly, and you can sense that somebody has been here recently.
+
+Yes, there was definitely butter happening here not long ago. And sugar.
+
+Looking around, you can see a low wooden table with a small penlight.
+
+There's a rug but not much else by way of furniture. Does anybody even live here?
+
+In front of you, a Victorian spiral staircase leads up and up and up. Oddly, the ceiling appears higher than you would have thought possible, based on what you can recall about the cottage's façade. Weird.
+
+To your left, there is a door. It is closed.
+
+To your right, there is another door. It is also closed.`,
+    exits: { up: "landing", upstairs: "landing", north: "landing", stairs: "landing", staircase: "landing", left: "kitchen", west: "kitchen", right: "living_room", east: "living_room", out: "outside", down: "outside", south: "outside" }
+  },
+  kitchen: {
+    name: "Kitchen",
+    description: `Okay, yes. This is where the butter was coming from.
+
+A batch of scones lies on a round table in the centre of the room, which is evidently a kitchen.
+
+A stove sits to your right. A fridge hums to your left, and the pantry door isn't fully closed.
+
+Wow, those scones look fresh. Probably best not to take any without asking.
+
+There doesn't seem to be much else here, just a random pole in the corner of the room. Makeshift strip club? Anything is possible at this point.`,
+    exits: { east: "foyer", back: "foyer", door: "foyer", out: "foyer" }
+  },
+  living_room: {
+    name: "Living Room",
+    description: `You push the door open slowly, feeling apprehensive for no apparent reason. Except, well, maybe the trespassing thing.
+
+There's some pressure coming from the other side, as if somebody, or something, is trying to push the door open from the other side.
+
+A strange sensation hits your shoe. You look down.
+
+To your great surprise, a flood of plastic balls breaks out of the room.
+
+The room is a ballpit and everything is chartreuse. Yes, that greenish yellow colour nobody can quite decide whether they like or not.
+
+You close the door hurriedly before the situation gets any worse. Nothing to see there!
+
+Maybe we should go upstairs. There is still a puzzle to be solved.`,
+    exits: { west: "foyer", back: "foyer", door: "foyer", out: "foyer" }
+  },
+  landing: {
+    name: "Landing",
+    description: `That took forever. You counted at least 288 steps.
+
+It's actually kind of crazy how big this place is. Anyway.
+
+You stand on an empty landing the size of a small swimming pool.
+
+A small green tufted velvet bench is pressed against the wall to your right. It feels like a thoughtful reward for those suffering from spiral staircase-induced vertigo and/or fatigue.
+
+The floor is slightly bouncy, as if there were springs installed under the carpeting.
+
+The entire north wall, which you are facing, is made of glass.
+
+On the other side of the sliding doors is a balcony looking out into a dense forest.
+
+Based on the position of the sun, it appears to be about 3pm, which is strange, given it was 5pm when you entered.
+
+To your left, there is a door. It is closed.
+
+To your right, there is another door. It is also closed.`,
+    exits: { north: "balcony", out: "balcony", forward: "balcony", left: "bedroom", west: "bedroom", right: "library", east: "library", down: "foyer", downstairs: "foyer", stairs: "foyer", staircase: "foyer" }
+  },
+  bedroom: {
+    name: "Bedroom",
+    description: `Ah, this must be the bedroom. It's the smallest room you've been in thus far, although you didn't really get a chance to gauge the size of the room to the east of the foyer.
+
+Looking to your right, you can see a semi-circular bed tucked into the wall.
+
+Looking straight ahead, there is a door which you assume leads to an ensuite bathroom.
+
+To your left, there is a vanity, a full-length mirror, and a wardrobe.
+
+You do a quick yodel for some reason. Not quite sure what came over you. The acoustics in here aren't what you expected.
+
+It seems to be a pretty standard bedroom otherwise, though.`,
+    exits: { bathroom: "bathroom", west: "bathroom", forward: "bathroom", hall: "landing", east: "landing", landing: "landing", back: "landing" }
+  },
+  bathroom: {
+    name: "Bathroom",
+    description: `Hey, you had a feeling this was a bathroom and you were right.
+
+If you need to pee, then you need to pee. Nature calls.
+
+If you don't need to pee, then come on, let's go back into the bedroom.`,
+    exits: { out: "bedroom", east: "bedroom", bedroom: "bedroom", back: "bedroom" }
+  },
+  balcony: {
+    name: "Balcony",
+    description: `The sun is setting and there's a strong wind coming from the east.
+
+You're standing on a narrow balcony. The air is cold but the sense of adventure keeps you from feeling any discomfort.
+
+Looking into the forest, you see nothing but trees almost Sequoian in their reach. They feel friendlier than one might typically think such a vast maze.
+
+A crow lands on the railing. It squawks and releases a crumpled piece of paper from its beak before flying away.`,
+    exits: { landing: "landing", inside: "landing", "in": "landing", south: "landing", back: "landing" }
+  },
+  library: {
+    name: "Library",
+    description: `You breathe in and close your eyes. Ah. Yes. Books.
+
+You stand in the entrance of the dimly-lit reading room.
+
+The air feels pregnant with prose, but you've always been charmingly pretentious, so maybe you're imagining things. Luckily, imagination is important for greatness.
+
+Two patchwork armchairs face each other in the centre of the space, as if they were put together by one person as a makeshift chaise longue.
+
+There aren't many books lining the shelves, maybe twelve or so, but it's hard to tell from the other side of the room.`,
+    exits: { west: "landing", back: "landing" }
+  }
+};
+
+// --- GAME STATE ---
+const state = {
+  currentRoom: "outside",
+  inventory: [],          // items player is carrying
+  hasPen: false,
+  penClicked: false,      // player knows it's a UV light
+  hasNote: false,
+  noteRevealed: false,    // UV pen used on note
+  sconeEaten: false,
+  fridgeOpened: false,
+  fridgeLocked: false,    // locked after ketchup attempt
+  pantryOpened: false,
+  pantryOpenedTwice: false,
+  jumpCount: 0,
+  leverRevealed: false,   // pulled Never Let Me Go
+  leverPulled: false,
+  shoesRemoved: false,
+  doorDisappeared: false,  // tried to leave after entering
+  pooInsist: false,
+  visitedFoyer: false,
+};
+
+const cantDoMessages = [
+  "The laws of The Cottage prevent this. Try something else!",
+  "Nothing happens :(",
+  "Girl what are you trying to do here",
+  "Ah, you can't do that here. Got a backup plan?",
+  "Interesting idea, but unfortunately, no can do.",
+  "You try, but the universe doesn't budge.",
+  "Good idea, but alas, no puedes.",
+  "The Machine doesn't know what you mean by that. Try again."
+];
+
+// --- DOM REFS ---
+const outputEl = document.getElementById('output');
+const inputEl = document.getElementById('command-input');
+const locationEl = document.getElementById('location-display');
+const inventoryBarEl = document.getElementById('inventory-bar');
+
+// --- HELPERS ---
+function randomCant() {
+  return cantDoMessages[Math.floor(Math.random() * cantDoMessages.length)];
+}
+
+function print(text, cls = '') {
+  const div = document.createElement('div');
+  div.className = 'message ' + cls;
+  div.textContent = text;
+  outputEl.appendChild(div);
+  outputEl.scrollTop = outputEl.scrollHeight;
+}
+
+function printRoom(roomId) {
+  const r = rooms[roomId];
+  const div = document.createElement('div');
+  div.className = 'message';
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'room-name';
+  nameSpan.textContent = r.name;
+  div.appendChild(nameSpan);
+  div.appendChild(document.createTextNode(r.description));
+  outputEl.appendChild(div);
+  outputEl.scrollTop = outputEl.scrollHeight;
+  locationEl.textContent = r.name;
+}
+
+function updateInventory() {
+  if (state.inventory.length === 0) {
+    inventoryBarEl.textContent = 'pockets: empty';
+  } else {
+    inventoryBarEl.textContent = 'pockets: ' + state.inventory.join(', ');
+  }
+}
+
+function hasItem(item) {
+  return state.inventory.includes(item);
+}
+
+function addItem(item) {
+  if (!state.inventory.includes(item)) {
+    state.inventory.push(item);
+    updateInventory();
+  }
+}
+
+function removeItem(item) {
+  state.inventory = state.inventory.filter(i => i !== item);
+  updateInventory();
+}
+
+function moveTo(roomId) {
+  state.currentRoom = roomId;
+  printRoom(roomId);
+
+  // Track foyer visit for door disappearing
+  if (roomId === 'foyer' && !state.visitedFoyer) {
+    state.visitedFoyer = true;
+  }
+}
+
+// --- INTRO ---
+print(`Welcome to The Cottage!
+
+To make your way through the story:
+- Type directions to move (think north, left, up, back)
+- 'look' or 'l' to inspect your surroundings
+- 'examine [thing]' or 'x [thing]' to inspect things
+- 'take [thing]' to pick things up
+- 'inventory' or 'i' to check your pockets
+- Think sideways, you never know what you might find
+
+There's a puzzle waiting to be solved! Good luck ;)
+
+— M
+
+✧･ﾟ: *✧･ﾟ:*  *:･ﾟ✧*:･ﾟ✧`, 'system');
+
+printRoom('outside');
+
+// --- COMMAND MATCHING HELPERS ---
+function cmdIncludes(cmd, ...terms) {
+  return terms.some(t => cmd.includes(t));
+}
+
+function cmdMatch(words, ...patterns) {
+  // Check if any pattern matches the words array
+  return patterns.some(p => {
+    const pts = p.split(' ');
+    return pts.every(pt => words.includes(pt));
+  });
+}
+
+// --- BOOK DATA ---
+const bookResponses = {
+  pachinko: `A handwritten message on the blank first page of the book reads:
+
+"An instant classic, a modern epic. Incredibly well-developed characters. Pachinko is a must-read for all, but be warned that you will experience intense cravings for banchan."`,
+
+  "never let me go": `A handwritten message on the blank first page of the book reads:
+
+"Perhaps one of the greatest novels published this century, Never Let Me Go is as haunting as it is heart-wrenching. Sci-fi, coming-of-age, romance, tragedy, all wrapped up into a Promethean snowball."
+
+You feel the ground shake slightly, and look to the spot in the bookshelf that you just pulled Ishiguro's masterpiece from. A shining golden lever glints at you as if it were smiling.`,
+
+  "the unreal and the real": `A handwritten message on the blank first page of the book reads:
+
+"Le Guin writes characters as if seeing them through paned glass. She creates a clear-as-day image, but the barrier between them and the reader is evident.
+
+Many of the short stories therein are not immediately striking, but often resurface in my thoughts after some time. I think of that as one sign of great fiction. Something about The Unreal and the Real makes me feel both like crying and as if I'm otherworldly — great mix!"`,
+
+  "being mortal": `A handwritten message on the blank first page of the book reads:
+
+"The world is always changing, but there are even more of us witnessing those changes over time. We're living to see so many more years, and this is both beautiful and terrifying. Being Mortal is a must-read for all."`,
+
+  "the story of a new name": `A handwritten message on the blank first page of the book reads:
+
+"Ferrante can do no wrong."`
+};
+
+// --- MAIN COMMAND PROCESSOR ---
+function processCommand(rawInput) {
+  const cmd = rawInput.trim().toLowerCase();
+  if (!cmd) return;
+
+  print(rawInput, 'command');
+
+  const words = cmd.split(/\s+/);
+  const verb = words[0];
+  const rest = words.slice(1).join(' ');
+  const room = state.currentRoom;
+  const exits = rooms[room].exits;
+
+  // --- INVENTORY ---
+  if (verb === 'inventory' || verb === 'i' || cmd === 'check pockets' || cmd === 'pockets') {
+    if (state.inventory.length === 0) {
+      print("Your pockets are empty. For now.");
+    } else {
+      print("You're carrying: " + state.inventory.join(', ') + ".");
+    }
+    return;
+  }
+
+  // --- HELP ---
+  if (verb === 'help' || verb === '?') {
+    print(`Commands:
+- Directions: north, south, east, west, up, down, left, right, back, forward, etc.
+- look / l — describe your surroundings
+- examine [thing] / x [thing] — inspect something
+- take [thing] — pick something up
+- drop [thing] — put something down
+- use [thing] — use an item
+- inventory / i — check your pockets
+- help — show this message`, 'system');
+    return;
+  }
+
+  // --- LOOK ---
+  if (verb === 'look' || verb === 'l') {
+    // "look" alone = describe room. "look [target]" = examine
+    if (!rest) {
+      printRoom(room);
+      return;
+    }
+    // Fall through to examine logic below
+  }
+
+  // ============================================================
+  // OBJECT INTERACTIONS (room-specific + inventory)
+  // ============================================================
+
+  // --- SHOES ---
+  if (cmdIncludes(cmd, 'shoes', 'shoe') && cmdIncludes(cmd, 'take off', 'remove', 'leave')) {
+    if (room === 'outside' || room === 'foyer') {
+      state.shoesRemoved = true;
+      print("Aw, that is very sweet and polite. Please take a screenshot and send to alixgwiesser@gmail.com, I didn't think anybody would actually think to do this!");
+      return;
+    }
+  }
+
+  // --- FRONT DOOR (disappearing) ---
+  if (room === 'foyer' && state.visitedFoyer && cmdIncludes(cmd, 'leave', 'exit', 'front door', 'outside') && (cmdIncludes(cmd, 'open', 'go', 'leave', 'exit') || verb === 'out' || verb === 'south' || verb === 'down' || verb === 'leave' || verb === 'exit')) {
+    // Check if trying to leave via the front door specifically
+    if (verb === 'out' || verb === 'south' || verb === 'down' || verb === 'leave' || verb === 'exit' || cmdIncludes(cmd, 'front door', 'outside')) {
+      state.doorDisappeared = true;
+      print("You turn around to leave but are met with a wall. Hopefully there's another exit hehe");
+      // Remove those exits
+      delete rooms.foyer.exits.out;
+      delete rooms.foyer.exits.down;
+      delete rooms.foyer.exits.south;
+      return;
+    }
+  }
+
+  // Also catch bare direction for foyer exit after first visit
+  if (room === 'foyer' && state.visitedFoyer && !state.doorDisappeared && (verb === 'out' || verb === 'south' || verb === 'down' || verb === 'leave' || verb === 'exit')) {
+    state.doorDisappeared = true;
+    print("You turn around to leave but are met with a wall. Hopefully there's another exit hehe");
+    delete rooms.foyer.exits.out;
+    delete rooms.foyer.exits.down;
+    delete rooms.foyer.exits.south;
+    return;
+  }
+
+  // --- UV PEN (foyer) ---
+  if (room === 'foyer' || hasItem('pen')) {
+    // Examine pen
+    if (cmdIncludes(cmd, 'pen', 'penlight', 'light') && (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect')) {
+      print("The pen is pink, with a translucent body and a little button on the back.");
+      return;
+    }
+
+    // Click/press/use pen
+    if (cmdIncludes(cmd, 'pen', 'penlight') && cmdIncludes(cmd, 'click', 'press', 'button', 'turn on', 'switch')) {
+      state.penClicked = true;
+      print("Instead of a pen nib, a dim light shines out of the pen. You're not convinced this would be that useful as a torch, but you imagine it might come in useful if you need to inspect anything up close.");
+      return;
+    }
+
+    // Take pen
+    if (room === 'foyer' && cmdIncludes(cmd, 'pen', 'penlight', 'light') && (verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get' || verb === 'keep' || cmdIncludes(cmd, 'pocket'))) {
+      if (!hasItem('pen')) {
+        addItem('pen');
+        state.hasPen = true;
+        print("Okay nice, you've got it now! Gimmick or not, you never know what weaponry might help in the future.");
+      } else {
+        print("You've already got the pen!");
+      }
+      return;
+    }
+
+    // Put down pen
+    if (hasItem('pen') && cmdIncludes(cmd, 'pen', 'penlight') && (cmdIncludes(cmd, 'put', 'drop', 'place'))) {
+      removeItem('pen');
+      state.hasPen = false;
+      print("You place it back on the table. What next?");
+      return;
+    }
+
+    // Shake pen
+    if (cmdIncludes(cmd, 'pen', 'penlight') && cmdIncludes(cmd, 'shake')) {
+      print("You shake the pen. It rattles slightly. Seems like a normal pen... sort of.");
+      return;
+    }
+  }
+
+  // --- USE PEN ON NOTE (anywhere) ---
+  if (hasItem('pen') && hasItem('note') && (cmdIncludes(cmd, 'shine', 'use pen', 'click pen', 'pen on', 'light on', 'uv') || (cmdIncludes(cmd, 'pen') && cmdIncludes(cmd, 'note', 'paper', 'message')))) {
+    if (!state.noteRevealed) {
+      state.noteRevealed = true;
+      state.penClicked = true;
+      print(`You click the pen and shine it on the blank piece of paper. You're a clever one. Upon the light hitting the paper, you're able to read the following string of characters: "ISBN9780571224128".`);
+    } else {
+      print(`The paper still reads: "ISBN9780571224128".`);
+    }
+    return;
+  }
+
+  // --- NOTE / PAPER (balcony) ---
+  if (cmdIncludes(cmd, 'note', 'paper', 'message', 'crumple')) {
+    // Examine / read note
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'read' || verb === 'inspect' || verb === 'open' || verb === 'uncrumple')) {
+      if (room === 'balcony' || hasItem('note')) {
+        if (state.noteRevealed) {
+          print(`The paper reads: "ISBN9780571224128".`);
+        } else {
+          print("You uncrumple the paper to reveal nothing. There's nothing on the paper.");
+        }
+        return;
+      }
+    }
+
+    // Take note
+    if ((verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get' || verb === 'keep' || cmdIncludes(cmd, 'pocket')) && (room === 'balcony' || hasItem('note'))) {
+      if (!hasItem('note')) {
+        addItem('note');
+        state.hasNote = true;
+        print("You fold the paper neatly, two times over, then put it in your back pocket in case you need it later.");
+      } else {
+        print("You've already got the note.");
+      }
+      return;
+    }
+
+    // Throw note
+    if (cmdIncludes(cmd, 'throw') && hasItem('note')) {
+      removeItem('note');
+      state.hasNote = false;
+      print("You throw the note off the balcony. The wind catches it and it disappears into the trees. Hopefully you didn't need that...");
+      return;
+    }
+  }
+
+  // --- SCONES (kitchen) ---
+  if (room === 'kitchen' && cmdIncludes(cmd, 'scone')) {
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect' || verb === 'take' || verb === 'get') {
+      print("Maybe a British person lives here. Oddly, you can't seem to recall which continent you're on, let alone which country. The scones still look really good and you're definitely peckish.");
+      return;
+    }
+    if (cmdIncludes(cmd, 'eat', 'munch', 'taste', 'bite', 'try', 'have')) {
+      if (!state.sconeEaten) {
+        state.sconeEaten = true;
+        print("Yeah, why not have just one? Just one! It's delicious. You put jam first, and then cream, of course. After wiping the crumbs off your face, you feel ready to keep exploring.");
+      } else {
+        print("You've already had one. Wouldn't want to push your luck.");
+      }
+      return;
+    }
+  }
+
+  // --- FRIDGE (kitchen) ---
+  if (room === 'kitchen' && cmdIncludes(cmd, 'fridge', 'refrigerator')) {
+    if (state.fridgeLocked) {
+      print("The fridge door won't budge. If it wasn't already obvious, whoever lives here is serious about their tomato sauce.");
+      return;
+    }
+    if (cmdIncludes(cmd, 'open', 'look', 'examine', 'x', 'inspect', 'go')) {
+      if (!state.fridgeOpened) {
+        state.fridgeOpened = true;
+        print("You open the door to a gorgeous, albeit surprising, sight: rows upon neat rows of Heinz Ketchup stare back at you. All but the front left bottle on the top shelf seem to be unopened. In the side door, an assortment of 10g ketchup packets and tiny ketchup bottles have been thrown in haphazardly. This could very well be sixteen litres of ketchup. Clearly, the homeowner has good taste. Extremely good taste.");
+      } else {
+        print("You open the door to a gorgeous, albeit surprising, sight: rows upon neat rows of Heinz Ketchup stare back at you. All but the front left bottle on the top shelf seem to be unopened. In the side door, an assortment of 10g ketchup packets and tiny ketchup bottles have been thrown in haphazardly. This could very well be sixteen litres of ketchup. Clearly, the homeowner has good taste. Extremely good taste.");
+      }
+      return;
+    }
+  }
+
+  // --- KETCHUP (kitchen) ---
+  if (room === 'kitchen' && cmdIncludes(cmd, 'ketchup', 'sauce', 'bottle')) {
+    if (state.fridgeLocked) {
+      print("The fridge door won't budge. If it wasn't already obvious, whoever lives here is serious about their tomato sauce.");
+      return;
+    }
+    if (cmdIncludes(cmd, 'take', 'eat', 'throw', 'steal', 'grab', 'drink', 'open', 'pour')) {
+      state.fridgeLocked = true;
+      print(`A voice booms down from Above, although they aren't truly audible. You hear their voice in your mind, but the words are formless. More of a mental intrusion… telepathic broadcast… situation… Nevertheless, the sentiment is clear. Don't touch the ketchup or you will (more than) likely regret it. You shut the door hurriedly and bow your head slightly, just in case. A micro-kowtow to the universe.`);
+      return;
+    }
+  }
+
+  // --- PANTRY (kitchen) ---
+  if (room === 'kitchen' && cmdIncludes(cmd, 'pantry')) {
+    if (cmdIncludes(cmd, 'open', 'look', 'examine', 'x', 'inspect', 'go')) {
+      if (!state.pantryOpened) {
+        state.pantryOpened = true;
+        print("The pantry is empty. Shame. You were kind of expecting something juicy. Oh, no, actually, there's some salt. Maldon sea salt, to be precise. Excellent. Anyway, andiamo!");
+      } else if (!state.pantryOpenedTwice) {
+        state.pantryOpenedTwice = true;
+        print("Look man, there's nothing in here. Promise! Respect the thoroughness, though! Kom op!");
+      } else {
+        print("Look man, there's nothing in here. Promise! Respect the thoroughness, though! Kom op!");
+      }
+      return;
+    }
+  }
+
+  // --- STOVE (kitchen) ---
+  if (room === 'kitchen' && cmdIncludes(cmd, 'stove', 'oven')) {
+    print("The stove is off but still warm to the touch. Scone evidence.");
+    return;
+  }
+
+  // --- POLE (kitchen) ---
+  if (room === 'kitchen' && cmdIncludes(cmd, 'pole')) {
+    if (cmdIncludes(cmd, 'spin', 'dance', 'swing', 'climb', 'slide', 'use')) {
+      print("The pole extends from floor to ceiling. It doesn't budge when you try to spin around it. You look around, embarrassed, but nobody's watching, thankfully.");
+      return;
+    }
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect') {
+      print("The pole extends from floor to ceiling. It doesn't budge when you try to spin around it. You look around, embarrassed, but nobody's watching, thankfully.");
+      return;
+    }
+  }
+
+  // --- WARDROBE (bedroom) → SECRET PASSAGE ---
+  if (room === 'bedroom' && cmdIncludes(cmd, 'wardrobe', 'closet')) {
+    if (cmdIncludes(cmd, 'open', 'enter', 'go', 'inside', 'look', 'examine', 'x', 'inspect')) {
+      print(`Oddly, there aren't any clothes in the wardrobe, nor hangers left for visitors. Most peculiar. You again notice that the acoustics are different from what you'd expect a shallow wardrobe to sound like. You step inside, perhaps against your better judgment, and instead of meeting solid ground, you fall.
+
+Down
+Down
+Down
+Down
+Down
+Down
+Down
+Down
+
+It's dark but you bump against something cold and grab hold. It seems to be some kind of scaffolding. Alas, it is not. You land on the floor of the kitchen, gripping onto the fireman's pole to lessen the impact.
+
+You appreciate the shortcut, but you realise you have to climb the staircase again if you're to continue your adventure.`);
+      moveTo('kitchen');
+      return;
+    }
+  }
+
+  // Also catch bare "wardrobe" in bedroom
+  if (room === 'bedroom' && verb === 'wardrobe') {
+    // This will be caught by exits as well, going to kitchen
+    print(`Oddly, there aren't any clothes in the wardrobe, nor hangers left for visitors. Most peculiar. You again notice that the acoustics are different from what you'd expect a shallow wardrobe to sound like. You step inside, perhaps against your better judgment, and instead of meeting solid ground, you fall.
+
+Down
+Down
+Down
+Down
+Down
+Down
+Down
+Down
+
+It's dark but you bump against something cold and grab hold. It seems to be some kind of scaffolding. Alas, it is not. You land on the floor of the kitchen, gripping onto the fireman's pole to lessen the impact.
+
+You appreciate the shortcut, but you realise you have to climb the staircase again if you're to continue your adventure.`);
+    state.currentRoom = 'kitchen';
+    locationEl.textContent = rooms.kitchen.name;
+    return;
+  }
+
+  // --- BOUNCE / JUMP (landing) ---
+  if (room === 'landing' && (cmdIncludes(cmd, 'jump', 'bounce', 'backflip', 'flip', 'hop') || (verb === 'jump' || verb === 'bounce' || verb === 'hop' || verb === 'flip'))) {
+    state.jumpCount++;
+    if (state.jumpCount === 1) {
+      print("No, yeah, this is bouncy for sure. You accidentally hit your head on the ceiling.");
+    } else if (state.jumpCount === 2) {
+      print("Okay, let's throw something cool. Double-double, nice! That's two rotations… twice! Consider the Olympics!");
+    } else {
+      print("Yes, we've established it's bouncy and fun. You're also playing this on the internet right now. It's fun to imagine jumping up and down but you might as well give me some jumping jacks at this point.\n\nLet's continue solving the puzzle, shall we?");
+    }
+    return;
+  }
+
+  // --- BENCH (landing) ---
+  if (room === 'landing' && cmdIncludes(cmd, 'bench')) {
+    if (cmdIncludes(cmd, 'sit', 'rest', 'examine', 'x', 'look', 'inspect')) {
+      print("The bench is green and tufted. It was either sold via a Facebook Marketplace lowball or purchased for a big, ugly price at an auction. It's hard to tell, but was definitely one of those.");
+      return;
+    }
+  }
+
+  // --- BED (bedroom) ---
+  if (room === 'bedroom' && cmdIncludes(cmd, 'bed')) {
+    if (cmdIncludes(cmd, 'lie', 'sleep', 'nap', 'rest', 'sit', 'go to bed')) {
+      print("No bed! Only adventure. Let's go!");
+      return;
+    }
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect') {
+      print("A semi-circular bed tucked into the wall. It looks incredibly comfortable but now is not the time.");
+      return;
+    }
+  }
+
+  // --- MIRROR (bedroom) ---
+  if (room === 'bedroom' && cmdIncludes(cmd, 'mirror')) {
+    print("You look in the mirror and see yourself. Hello, u! Mesmerising, but distracting. We must make moves.");
+    return;
+  }
+
+  // --- VANITY (bedroom) ---
+  if (room === 'bedroom' && cmdIncludes(cmd, 'vanity')) {
+    print("You look in the mirror and see yourself. Hello, u! Mesmerising, but distracting. We must make moves.");
+    return;
+  }
+
+  // --- TOILET / PEE / BATHROOM ---
+  if (room === 'bathroom')) {
+    if (cmdIncludes(cmd, 'pee', 'wee', 'urinate', 'use toilet', 'use loo', 'use bathroom', 'relieve')) {
+      print("Well, that was nice. Now we get back to focusing on the task at hand!");
+      return;
+    }
+    if (cmdIncludes(cmd, 'flush')) {
+      print("Nice touch, duly noted. Let's go!");
+      return;
+    }
+    if (cmdIncludes(cmd, 'poo', 'poop', 'shit', 'number two', 'number 2', 'dump')) {
+      if (state.pooInsist) {
+        print("Bruh");
+      } else {
+        state.pooInsist = true;
+        print("That's not an urgent task right now!");
+      }
+      return;
+    }
+  }
+
+  // --- CROW (balcony) ---
+  if (room === 'balcony' && cmdIncludes(cmd, 'crow', 'bird', 'raven')) {
+    print("The crow has already flown away, but it left behind a crumpled piece of paper on the railing.");
+    return;
+  }
+
+  // --- FOREST / TREES (balcony) ---
+  if (room === 'balcony' && cmdIncludes(cmd, 'tree', 'forest')) {
+    print("The trees are imposing but friendly. You make a mental note to go give them a hug once you leave the cottage.");
+    return;
+  }
+
+  // --- COTTAGE (outside) ---
+  if (room === 'outside' && cmdIncludes(cmd, 'cottage', 'house', 'building')) {
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect') {
+      print("Vines creep up the off-white paint on the cottage's facade. A crow perches on the edge of the shingled roof.\n\nThe vibes are good, not sinister at all. This feels like a home you can trust. At the same time, maybe that's what they want you to think…");
+      return;
+    }
+  }
+
+  // --- DOORMAT (outside) ---
+  if (room === 'outside' && cmdIncludes(cmd, 'doormat', 'mat', 'rug')) {
+    print("The doormat has picked up some debris over time, as one would expect a doormat to have done.");
+    return;
+  }
+
+  // --- SPIRAL STAIRCASE (foyer) ---
+  if (room === 'foyer' && cmdIncludes(cmd, 'staircase', 'stairs', 'spiral') && (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect')) {
+    print("After the first thirty or so steps, the rest of the staircase continues through a circular hole in the ceiling. You'll have to start climbing to find out what lies above!");
+    return;
+  }
+
+  // --- TABLE / RUG (foyer) ---
+  if (room === 'foyer' && cmdIncludes(cmd, 'table')) {
+    print("A low wooden table. On it sits a small penlight. Might be worth taking a closer look.");
+    return;
+  }
+  if (room === 'foyer' && cmdIncludes(cmd, 'rug')) {
+    print("A rug. It's just a rug. Nice pattern, though.");
+    return;
+  }
+
+  // --- ARMCHAIRS (library) ---
+  if (room === 'library' && cmdIncludes(cmd, 'armchair', 'chair', 'seat', 'sit')) {
+    print("Ah, it would be nice to rest in an armchair for a second, maybe open up one of the books. Perhaps next time.");
+    return;
+  }
+
+  // --- BOOKS / BOOKSHELF (library) ---
+  if (room === 'library' && (cmdIncludes(cmd, 'book', 'shelf', 'shelves') || cmdIncludes(cmd, 'pachinko', 'never let me go', 'ishiguro', 'unreal', 'le guin', 'being mortal', 'gawande', 'ferrante', 'new name'))) {
+
+    // Check for specific books
+    if (cmdIncludes(cmd, 'pachinko')) {
+      print(bookResponses['pachinko']);
+      return;
+    }
+
+    if (cmdIncludes(cmd, 'never let me go') || cmdIncludes(cmd, 'ishiguro') || cmd.includes('isbn') || cmd.includes('9780571224128') || cmd.includes('0571224128')) {
+      if (!state.leverRevealed) {
+        state.leverRevealed = true;
+      }
+      print(bookResponses['never let me go']);
+      return;
+    }
+
+    if (cmdIncludes(cmd, 'unreal') || cmdIncludes(cmd, 'le guin')) {
+      print(bookResponses['the unreal and the real']);
+      return;
+    }
+
+    if (cmdIncludes(cmd, 'being mortal') || cmdIncludes(cmd, 'gawande')) {
+      print(bookResponses['being mortal']);
+      return;
+    }
+
+    if (cmdIncludes(cmd, 'new name') || cmdIncludes(cmd, 'ferrante')) {
+      print(bookResponses['the story of a new name']);
+      return;
+    }
+
+    // Generic book / shelf examine
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect' || verb === 'read' || verb === 'browse')) {
+      print(`The books are arranged neatly, although they don't seem to be arranged in any specific way.
+
+You guess there are perhaps eighteen books at a glance, but you know if you stop and start reading any of them, that'll be a sure recipe for overstaying your welcome.
+
+A few titles stand out:
+Pachinko by Min Jin Lee
+Never Let Me Go by Kazuo Ishiguro
+The Unreal and the Real by Ursula K. Le Guin
+Being Mortal by Atul Gawande
+The Story of a New Name by Elena Ferrante`);
+      return;
+    }
+
+    // Trying a book not on the list
+    if (verb === 'take' || verb === 'read' || verb === 'open')) {
+      print(randomCant());
+      return;
+    }
+  }
+
+  // --- LEVER (library, after revealing) ---
+  if (room === 'library' && cmdIncludes(cmd, 'lever')) {
+    if (!state.leverRevealed) {
+      print(randomCant());
+      return;
+    }
+    if (cmdIncludes(cmd, 'push')) {
+      print("This is more of a pull situation.");
+      return;
+    }
+    if (cmdIncludes(cmd, 'pull', 'use', 'grab', 'yank')) {
+      state.leverPulled = true;
+      print(`The metal sings as you pull it towards you. An emcee-esque voice shouts:
+
+'You made it out of the Cottage, Y/N!'
+
+Welcome to the Guesthouse.`);
+
+      // Transition to chatroom after a beat
+      setTimeout(() => {
+        enterChatroom();
+      }, 2500);
+      return;
+    }
+    // Just examining it
+    print("A shining golden lever protrudes from the bookshelf where Never Let Me Go once sat. It looks like it wants to be pulled.");
+    return;
+  }
+
+  // ============================================================
+  // GENERIC EXAMINE (catch-all for "examine X" or "look X")
+  // ============================================================
+  if (verb === 'examine' || verb === 'x' || (verb === 'look' && rest)) {
+    // If we got here, nothing specific matched
+    print(randomCant());
+    return;
+  }
+
+  // --- DROP ---
+  if (verb === 'drop' || verb === 'put down')) {
+    if (rest && hasItem(rest)) {
+      removeItem(rest);
+      print(`You set the ${rest} down.`);
+    } else {
+      print("You don't have that.");
+    }
+    return;
+  }
+
+  // --- USE (generic) ---
+  if (verb === 'use')) {
+    if (cmdIncludes(cmd, 'pen') && hasItem('pen') && hasItem('note')) {
+      if (!state.noteRevealed) {
+        state.noteRevealed = true;
+        state.penClicked = true;
+        print(`You click the pen and shine it on the blank piece of paper. You're a clever one. Upon the light hitting the paper, you're able to read the following string of characters: "ISBN9780571224128".`);
+      } else {
+        print(`The paper still reads: "ISBN9780571224128".`);
+      }
+      return;
+    }
+    print(randomCant());
+    return;
+  }
+
+  // ============================================================
+  // MOVEMENT
+  // ============================================================
+
+  // "go [direction]" / "move [direction]" / "walk [direction]" / "head [direction]"
+  if (verb === 'go' || verb === 'move' || verb === 'walk' || verb === 'head' || verb === 'enter')) {
+    const dir = rest || '';
+    if (dir && exits[dir]) {
+      moveTo(exits[dir]);
+      return;
+    }
+    // Check multi-word exits
+    for (const [exitKey, exitRoom] of Object.entries(exits)) {
+      if (dir.includes(exitKey)) {
+        moveTo(exitRoom);
+        return;
+      }
+    }
+    print(randomCant());
+    return;
+  }
+
+  // Bare direction
+  if (exits[verb]) {
+    moveTo(exits[verb]);
+    return;
+  }
+
+  // Multi-word matching for exits
+  for (const [exitKey, exitRoom] of Object.entries(exits)) {
+    if (cmd === exitKey || cmd.includes(exitKey)) {
+      moveTo(exitRoom);
+      return;
+    }
+  }
+
+  // ============================================================
+  // TAKE (generic, if not caught above)
+  // ============================================================
+  if (verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get')) {
+    // Pen in foyer
+    if (room === 'foyer' && cmdIncludes(cmd, 'pen', 'penlight', 'light')) {
+      if (!hasItem('pen')) {
+        addItem('pen');
+        state.hasPen = true;
+        print("Okay nice, you've got it now! Gimmick or not, you never know what weaponry might help in the future.");
+      } else {
+        print("You've already got the pen!");
+      }
+      return;
+    }
+    // Note on balcony
+    if (room === 'balcony' && cmdIncludes(cmd, 'note', 'paper', 'message')) {
+      if (!hasItem('note')) {
+        addItem('note');
+        state.hasNote = true;
+        print("You fold the paper neatly, two times over, then put it in your back pocket in case you need it later.");
+      } else {
+        print("You've already got the note.");
+      }
+      return;
+    }
+    print(randomCant());
+    return;
+  }
+
+  // ============================================================
+  // FALLBACK
+  // ============================================================
+  print(randomCant());
+}
+
+// --- INPUT HANDLING ---
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const val = inputEl.value;
+    if (val.trim()) {
+      processCommand(val);
+      inputEl.value = '';
+    }
+  }
+});
+
+// ============================================================
+// CHATROOM (Supabase)
+// ============================================================
+// TODO: Replace with your actual Supabase credentials
+const SB_URL='https://bmhbdqvjlxrifiupqrni.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtaGJkcXZqbHhyaWZpdXBxcm5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMDYzNjMsImV4cCI6MjA4Nzc4MjM2M30.HuYVHZsc_EMrKc4P1Mdn2VDoEv0oZK2-2WJYU5zxXYU';
+const SUPABASE_URL = SB_URL;
+const SUPABASE_KEY = SB_KEY;
+
+let chatUsername = '';
+let chatChannel = null;
+
+function enterChatroom() {
+  const game = document.getElementById('game-container');
+  const chat = document.getElementById('chatroom');
+
+  // Fade out the game, then fade in the chatroom
+  game.classList.add('fade-out');
+
+  setTimeout(() => {
+    game.classList.add('hidden');
+    game.classList.remove('fade-out');
+
+    chat.classList.add('active');
+
+    // Allow layout to apply before fading in
+    requestAnimationFrame(() => {
+      chat.classList.add('visible');
+    });
+
+    document.getElementById('name-modal').classList.add('active');
+    document.getElementById('name-input').focus();
+  }, 600);
+}
+
+// Name modal
+document.getElementById('name-submit').addEventListener('click', submitName);
+document.getElementById('name-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submitName();
+});
+
+function submitName() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) return;
+  chatUsername = name;
+  document.getElementById('name-modal').classList.remove('active');
+  document.getElementById('chat-input').focus();
+  initChat();
+}
+
+async function initChat() {
+  // If Supabase credentials aren't configured, use a local-only fallback
+  if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL')) {
+    addChatMessage('system', 'You solved The Cottage! Chatroom coming soon.', new Date());
+    return;
+  }
+
+  // Load Supabase client
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.onload = () => {
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Load existing messages
+    loadMessages(supabase);
+
+    // Subscribe to new messages via Realtime
+    chatChannel = supabase.channel('guesthouse')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages'
+      }, (payload) => {
+        const msg = payload.new;
+        addChatMessage(msg.username, msg.content, new Date(msg.created_at));
+      })
+      .subscribe();
+
+    // Send message handler
+    window.sendChatMessage = async (content) => {
+      await supabase.from('messages').insert({
+        username: chatUsername,
+        content: content
+      });
+    };
+  };
+  document.head.appendChild(script);
+}
+
+async function loadMessages(supabase) {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .order('created_at', { ascending: true })
+    .limit(200);
+
+  if (data) {
+    data.forEach(msg => {
+      addChatMessage(msg.username, msg.content, new Date(msg.created_at));
+    });
+  }
+
+  const { error: joinError } = await supabase
+    .from('messages')
+    .insert({
+      username: 'system',
+      content: `${chatUsername} has entered the Guesthouse`
+    });
+
+  if (joinError) {
+    // If the insert fails, still show a local system message
+    addChatMessage('system', `${chatUsername} has entered the Guesthouse`, new Date());
+  }
+}
+
+function addChatMessage(name, text, date) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  const isSystem = name === 'system';
+  const isOwn = !isSystem && name === chatUsername;
+  div.className = isSystem ? 'chat-msg chat-system' : isOwn ? 'chat-msg chat-own' : 'chat-msg';
+
+  if (!isSystem) {
+    const nameEl = document.createElement('div');
+    nameEl.className = 'chat-name';
+    nameEl.textContent = name;
+
+    const textEl = document.createElement('div');
+    textEl.className = 'chat-text';
+    textEl.textContent = text;
+
+    const timeEl = document.createElement('div');
+    timeEl.className = 'chat-time';
+    timeEl.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    div.appendChild(nameEl);
+    div.appendChild(textEl);
+    div.appendChild(timeEl);
+  } else {
+    const textEl = document.createElement('div');
+    textEl.className = 'chat-text';
+    textEl.textContent = text;
+
+    const timeEl = document.createElement('div');
+    timeEl.className = 'chat-time';
+    timeEl.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    div.appendChild(textEl);
+    div.appendChild(timeEl);
+  }
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+// Chat input
+document.getElementById('chat-send').addEventListener('click', sendChat);
+document.getElementById('chat-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendChat();
+});
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  if (window.sendChatMessage) {
+    window.sendChatMessage(text);
+  } else {
+    // Fallback: local only
+    addChatMessage(chatUsername, text, new Date());
+  }
+}
+</script>
+</body>
+</html>
