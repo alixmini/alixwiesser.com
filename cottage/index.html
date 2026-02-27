@@ -29,8 +29,8 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: var(--bg);
-    color: #c5f3c5;
+    background: #f3e5cf;
+    color: #7ab87a;
     font-family: 'JetBrains Mono', monospace;
     height: 100vh;
     display: flex;
@@ -40,7 +40,7 @@
 
   #game-header {
     padding: 12px 24px;
-    border-bottom: 1px solid var(--bg-lighter);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.75rem;
     color: var(--chat-muted, #7a9185);
@@ -48,6 +48,7 @@
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+    background: #f3e5cf;
   }
 
   #game-header .location {
@@ -59,6 +60,24 @@
     color: var(--chat-muted, #7a9185);
   }
 
+  #game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: opacity 0.6s ease;
+    background: #f3e5cf;
+    color: #c5f3c5;
+  }
+
+  #game-container.hidden {
+    display: none;
+    opacity: 0;
+  }
+
+  #game-container.fade-out {
+    opacity: 0;
+  }
+
   #output {
     flex: 1;
     overflow-y: auto;
@@ -67,8 +86,8 @@
   }
 
   #output::-webkit-scrollbar { width: 6px; }
-  #output::-webkit-scrollbar-track { background: var(--bg); }
-  #output::-webkit-scrollbar-thumb { background: var(--bg-lighter); border-radius: 3px; }
+  #output::-webkit-scrollbar-track { background: #f3e5cf; }
+  #output::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 3px; }
 
   .message {
     max-width: 720px;
@@ -114,9 +133,10 @@
   }
 
   #input-area {
-    border-top: 1px solid var(--bg-lighter);
+    border-top: 1px solid rgba(0,0,0,0.08);
     padding: 16px 24px;
     flex-shrink: 0;
+    background: #f3e5cf;
   }
 
   #input-row {
@@ -138,7 +158,7 @@
     flex: 1;
     background: transparent;
     border: none;
-    color: #c5f3c5;
+    color: #7ab87a;
     font-family: 'JetBrains Mono', monospace;
     font-size: 1rem;
     outline: none;
@@ -167,22 +187,6 @@
 
   #chatroom.visible {
     opacity: 1;
-  }
-
-  #game-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    transition: opacity 0.6s ease;
-  }
-
-  #game-container.hidden {
-    display: none;
-    opacity: 0;
-  }
-
-  #game-container.fade-out {
-    opacity: 0;
   }
 
   #chat-header {
@@ -820,11 +824,9 @@ function processCommand(rawInput) {
 
   // --- FRONT DOOR (disappearing) ---
   if (room === 'foyer' && state.visitedFoyer && cmdIncludes(cmd, 'leave', 'exit', 'front door', 'outside') && (cmdIncludes(cmd, 'open', 'go', 'leave', 'exit') || verb === 'out' || verb === 'south' || verb === 'down' || verb === 'leave' || verb === 'exit')) {
-    // Check if trying to leave via the front door specifically
     if (verb === 'out' || verb === 'south' || verb === 'down' || verb === 'leave' || verb === 'exit' || cmdIncludes(cmd, 'front door', 'outside')) {
       state.doorDisappeared = true;
       print("You turn around to leave but are met with a wall. Hopefully there's another exit hehe");
-      // Remove those exits
       delete rooms.foyer.exits.out;
       delete rooms.foyer.exits.down;
       delete rooms.foyer.exits.south;
@@ -832,7 +834,6 @@ function processCommand(rawInput) {
     }
   }
 
-  // Also catch bare direction for foyer exit after first visit
   if (room === 'foyer' && state.visitedFoyer && !state.doorDisappeared && (verb === 'out' || verb === 'south' || verb === 'down' || verb === 'leave' || verb === 'exit')) {
     state.doorDisappeared = true;
     print("You turn around to leave but are met with a wall. Hopefully there's another exit hehe");
@@ -844,20 +845,15 @@ function processCommand(rawInput) {
 
   // --- UV PEN (foyer) ---
   if (room === 'foyer' || hasItem('pen')) {
-    // Examine pen
     if (cmdIncludes(cmd, 'pen', 'penlight', 'light') && (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect')) {
       print("The pen is pink, with a translucent body and a little button on the back.");
       return;
     }
-
-    // Click/press/use pen
     if (cmdIncludes(cmd, 'pen', 'penlight') && cmdIncludes(cmd, 'click', 'press', 'button', 'turn on', 'switch')) {
       state.penClicked = true;
       print("Instead of a pen nib, a dim light shines out of the pen. You're not convinced this would be that useful as a torch, but you imagine it might come in useful if you need to inspect anything up close.");
       return;
     }
-
-    // Take pen
     if (room === 'foyer' && cmdIncludes(cmd, 'pen', 'penlight', 'light') && (verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get' || verb === 'keep' || cmdIncludes(cmd, 'pocket'))) {
       if (!hasItem('pen')) {
         addItem('pen');
@@ -868,16 +864,12 @@ function processCommand(rawInput) {
       }
       return;
     }
-
-    // Put down pen
     if (hasItem('pen') && cmdIncludes(cmd, 'pen', 'penlight') && (cmdIncludes(cmd, 'put', 'drop', 'place'))) {
       removeItem('pen');
       state.hasPen = false;
       print("You place it back on the table. What next?");
       return;
     }
-
-    // Shake pen
     if (cmdIncludes(cmd, 'pen', 'penlight') && cmdIncludes(cmd, 'shake')) {
       print("You shake the pen. It rattles slightly. Seems like a normal pen... sort of.");
       return;
@@ -898,8 +890,7 @@ function processCommand(rawInput) {
 
   // --- NOTE / PAPER (balcony) ---
   if (cmdIncludes(cmd, 'note', 'paper', 'message', 'crumple')) {
-    // Examine / read note
-    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'read' || verb === 'inspect' || verb === 'open' || verb === 'uncrumple')) {
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'read' || verb === 'inspect' || verb === 'open' || verb === 'uncrumple') {
       if (room === 'balcony' || hasItem('note')) {
         if (state.noteRevealed) {
           print(`The paper reads: "ISBN9780571224128".`);
@@ -909,8 +900,6 @@ function processCommand(rawInput) {
         return;
       }
     }
-
-    // Take note
     if ((verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get' || verb === 'keep' || cmdIncludes(cmd, 'pocket')) && (room === 'balcony' || hasItem('note'))) {
       if (!hasItem('note')) {
         addItem('note');
@@ -921,8 +910,6 @@ function processCommand(rawInput) {
       }
       return;
     }
-
-    // Throw note
     if (cmdIncludes(cmd, 'throw') && hasItem('note')) {
       removeItem('note');
       state.hasNote = false;
@@ -948,7 +935,7 @@ function processCommand(rawInput) {
     }
   }
 
-  // --- FRIDGE (kitchen) ---
+  // --- FRIDGE / KETCHUP / PANTRY / STOVE / POLE (kitchen) ---
   if (room === 'kitchen' && cmdIncludes(cmd, 'fridge', 'refrigerator')) {
     if (state.fridgeLocked) {
       print("The fridge door won't budge. If it wasn't already obvious, whoever lives here is serious about their tomato sauce.");
@@ -964,8 +951,6 @@ function processCommand(rawInput) {
       return;
     }
   }
-
-  // --- KETCHUP (kitchen) ---
   if (room === 'kitchen' && cmdIncludes(cmd, 'ketchup', 'sauce', 'bottle')) {
     if (state.fridgeLocked) {
       print("The fridge door won't budge. If it wasn't already obvious, whoever lives here is serious about their tomato sauce.");
@@ -977,8 +962,6 @@ function processCommand(rawInput) {
       return;
     }
   }
-
-  // --- PANTRY (kitchen) ---
   if (room === 'kitchen' && cmdIncludes(cmd, 'pantry')) {
     if (cmdIncludes(cmd, 'open', 'look', 'examine', 'x', 'inspect', 'go')) {
       if (!state.pantryOpened) {
@@ -993,14 +976,10 @@ function processCommand(rawInput) {
       return;
     }
   }
-
-  // --- STOVE (kitchen) ---
   if (room === 'kitchen' && cmdIncludes(cmd, 'stove', 'oven')) {
     print("The stove is off but still warm to the touch. Scone evidence.");
     return;
   }
-
-  // --- POLE (kitchen) ---
   if (room === 'kitchen' && cmdIncludes(cmd, 'pole')) {
     if (cmdIncludes(cmd, 'spin', 'dance', 'swing', 'climb', 'slide', 'use')) {
       print("The pole extends from floor to ceiling. It doesn't budge when you try to spin around it. You look around, embarrassed, but nobody's watching, thankfully.");
@@ -1012,7 +991,7 @@ function processCommand(rawInput) {
     }
   }
 
-  // --- WARDROBE (bedroom) → SECRET PASSAGE ---
+  // --- WARDROBE (bedroom) ---
   if (room === 'bedroom' && cmdIncludes(cmd, 'wardrobe', 'closet')) {
     if (cmdIncludes(cmd, 'open', 'enter', 'go', 'inside', 'look', 'examine', 'x', 'inspect')) {
       print(`Oddly, there aren't any clothes in the wardrobe, nor hangers left for visitors. Most peculiar. You again notice that the acoustics are different from what you'd expect a shallow wardrobe to sound like. You step inside, perhaps against your better judgment, and instead of meeting solid ground, you fall.
@@ -1033,10 +1012,7 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
       return;
     }
   }
-
-  // Also catch bare "wardrobe" in bedroom
   if (room === 'bedroom' && verb === 'wardrobe') {
-    // This will be caught by exits as well, going to kitchen
     print(`Oddly, there aren't any clothes in the wardrobe, nor hangers left for visitors. Most peculiar. You again notice that the acoustics are different from what you'd expect a shallow wardrobe to sound like. You step inside, perhaps against your better judgment, and instead of meeting solid ground, you fall.
 
 Down
@@ -1077,7 +1053,7 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
     }
   }
 
-  // --- BED (bedroom) ---
+  // --- BED / MIRROR / VANITY (bedroom) ---
   if (room === 'bedroom' && cmdIncludes(cmd, 'bed')) {
     if (cmdIncludes(cmd, 'lie', 'sleep', 'nap', 'rest', 'sit', 'go to bed')) {
       print("No bed! Only adventure. Let's go!");
@@ -1088,21 +1064,13 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
       return;
     }
   }
-
-  // --- MIRROR (bedroom) ---
-  if (room === 'bedroom' && cmdIncludes(cmd, 'mirror')) {
+  if (room === 'bedroom' && (cmdIncludes(cmd, 'mirror') || cmdIncludes(cmd, 'vanity'))) {
     print("You look in the mirror and see yourself. Hello, u! Mesmerising, but distracting. We must make moves.");
     return;
   }
 
-  // --- VANITY (bedroom) ---
-  if (room === 'bedroom' && cmdIncludes(cmd, 'vanity')) {
-    print("You look in the mirror and see yourself. Hello, u! Mesmerising, but distracting. We must make moves.");
-    return;
-  }
-
-  // --- TOILET / PEE / BATHROOM ---
-  if (room === 'bathroom')) {
+  // --- TOILET / BATHROOM ---
+  if (room === 'bathroom') {
     if (cmdIncludes(cmd, 'pee', 'wee', 'urinate', 'use toilet', 'use loo', 'use bathroom', 'relieve')) {
       print("Well, that was nice. Now we get back to focusing on the task at hand!");
       return;
@@ -1122,39 +1090,33 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
     }
   }
 
-  // --- CROW (balcony) ---
+  // --- CROW / FOREST (balcony) ---
   if (room === 'balcony' && cmdIncludes(cmd, 'crow', 'bird', 'raven')) {
     print("The crow has already flown away, but it left behind a crumpled piece of paper on the railing.");
     return;
   }
-
-  // --- FOREST / TREES (balcony) ---
   if (room === 'balcony' && cmdIncludes(cmd, 'tree', 'forest')) {
     print("The trees are imposing but friendly. You make a mental note to go give them a hug once you leave the cottage.");
     return;
   }
 
-  // --- COTTAGE (outside) ---
+  // --- COTTAGE / DOORMAT (outside) ---
   if (room === 'outside' && cmdIncludes(cmd, 'cottage', 'house', 'building')) {
     if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect') {
       print("Vines creep up the off-white paint on the cottage's facade. A crow perches on the edge of the shingled roof.\n\nThe vibes are good, not sinister at all. This feels like a home you can trust. At the same time, maybe that's what they want you to think…");
       return;
     }
   }
-
-  // --- DOORMAT (outside) ---
   if (room === 'outside' && cmdIncludes(cmd, 'doormat', 'mat', 'rug')) {
     print("The doormat has picked up some debris over time, as one would expect a doormat to have done.");
     return;
   }
 
-  // --- SPIRAL STAIRCASE (foyer) ---
+  // --- STAIRCASE / TABLE / RUG (foyer) ---
   if (room === 'foyer' && cmdIncludes(cmd, 'staircase', 'stairs', 'spiral') && (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect')) {
     print("After the first thirty or so steps, the rest of the staircase continues through a circular hole in the ceiling. You'll have to start climbing to find out what lies above!");
     return;
   }
-
-  // --- TABLE / RUG (foyer) ---
   if (room === 'foyer' && cmdIncludes(cmd, 'table')) {
     print("A low wooden table. On it sits a small penlight. Might be worth taking a closer look.");
     return;
@@ -1172,13 +1134,10 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
 
   // --- BOOKS / BOOKSHELF (library) ---
   if (room === 'library' && (cmdIncludes(cmd, 'book', 'shelf', 'shelves') || cmdIncludes(cmd, 'pachinko', 'never let me go', 'ishiguro', 'unreal', 'le guin', 'being mortal', 'gawande', 'ferrante', 'new name'))) {
-
-    // Check for specific books
     if (cmdIncludes(cmd, 'pachinko')) {
       print(bookResponses['pachinko']);
       return;
     }
-
     if (cmdIncludes(cmd, 'never let me go') || cmdIncludes(cmd, 'ishiguro') || cmd.includes('isbn') || cmd.includes('9780571224128') || cmd.includes('0571224128')) {
       if (!state.leverRevealed) {
         state.leverRevealed = true;
@@ -1186,24 +1145,19 @@ You appreciate the shortcut, but you realise you have to climb the staircase aga
       print(bookResponses['never let me go']);
       return;
     }
-
     if (cmdIncludes(cmd, 'unreal') || cmdIncludes(cmd, 'le guin')) {
       print(bookResponses['the unreal and the real']);
       return;
     }
-
     if (cmdIncludes(cmd, 'being mortal') || cmdIncludes(cmd, 'gawande')) {
       print(bookResponses['being mortal']);
       return;
     }
-
     if (cmdIncludes(cmd, 'new name') || cmdIncludes(cmd, 'ferrante')) {
       print(bookResponses['the story of a new name']);
       return;
     }
-
-    // Generic book / shelf examine
-    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect' || verb === 'read' || verb === 'browse')) {
+    if (verb === 'examine' || verb === 'x' || verb === 'look' || verb === 'inspect' || verb === 'read' || verb === 'browse') {
       print(`The books are arranged neatly, although they don't seem to be arranged in any specific way.
 
 You guess there are perhaps eighteen books at a glance, but you know if you stop and start reading any of them, that'll be a sure recipe for overstaying your welcome.
@@ -1216,15 +1170,13 @@ Being Mortal by Atul Gawande
 The Story of a New Name by Elena Ferrante`);
       return;
     }
-
-    // Trying a book not on the list
-    if (verb === 'take' || verb === 'read' || verb === 'open')) {
+    if (verb === 'take' || verb === 'read' || verb === 'open') {
       print(randomCant());
       return;
     }
   }
 
-  // --- LEVER (library, after revealing) ---
+  // --- LEVER (library) ---
   if (room === 'library' && cmdIncludes(cmd, 'lever')) {
     if (!state.leverRevealed) {
       print(randomCant());
@@ -1242,28 +1194,23 @@ The Story of a New Name by Elena Ferrante`);
 
 Welcome to the Guesthouse.`);
 
-      // Transition to chatroom after a beat
       setTimeout(() => {
         enterChatroom();
       }, 2500);
       return;
     }
-    // Just examining it
     print("A shining golden lever protrudes from the bookshelf where Never Let Me Go once sat. It looks like it wants to be pulled.");
     return;
   }
 
-  // ============================================================
-  // GENERIC EXAMINE (catch-all for "examine X" or "look X")
-  // ============================================================
+  // --- GENERIC EXAMINE ---
   if (verb === 'examine' || verb === 'x' || (verb === 'look' && rest)) {
-    // If we got here, nothing specific matched
     print(randomCant());
     return;
   }
 
   // --- DROP ---
-  if (verb === 'drop' || verb === 'put down')) {
+  if (verb === 'drop' || verb === 'put down') {
     if (rest && hasItem(rest)) {
       removeItem(rest);
       print(`You set the ${rest} down.`);
@@ -1274,7 +1221,7 @@ Welcome to the Guesthouse.`);
   }
 
   // --- USE (generic) ---
-  if (verb === 'use')) {
+  if (verb === 'use') {
     if (cmdIncludes(cmd, 'pen') && hasItem('pen') && hasItem('note')) {
       if (!state.noteRevealed) {
         state.noteRevealed = true;
@@ -1289,18 +1236,13 @@ Welcome to the Guesthouse.`);
     return;
   }
 
-  // ============================================================
-  // MOVEMENT
-  // ============================================================
-
-  // "go [direction]" / "move [direction]" / "walk [direction]" / "head [direction]"
-  if (verb === 'go' || verb === 'move' || verb === 'walk' || verb === 'head' || verb === 'enter')) {
+  // --- MOVEMENT ---
+  if (verb === 'go' || verb === 'move' || verb === 'walk' || verb === 'head' || verb === 'enter') {
     const dir = rest || '';
     if (dir && exits[dir]) {
       moveTo(exits[dir]);
       return;
     }
-    // Check multi-word exits
     for (const [exitKey, exitRoom] of Object.entries(exits)) {
       if (dir.includes(exitKey)) {
         moveTo(exitRoom);
@@ -1310,14 +1252,10 @@ Welcome to the Guesthouse.`);
     print(randomCant());
     return;
   }
-
-  // Bare direction
   if (exits[verb]) {
     moveTo(exits[verb]);
     return;
   }
-
-  // Multi-word matching for exits
   for (const [exitKey, exitRoom] of Object.entries(exits)) {
     if (cmd === exitKey || cmd.includes(exitKey)) {
       moveTo(exitRoom);
@@ -1325,11 +1263,8 @@ Welcome to the Guesthouse.`);
     }
   }
 
-  // ============================================================
-  // TAKE (generic, if not caught above)
-  // ============================================================
-  if (verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get')) {
-    // Pen in foyer
+  // --- TAKE (generic) ---
+  if (verb === 'take' || verb === 'grab' || verb === 'pick' || verb === 'get') {
     if (room === 'foyer' && cmdIncludes(cmd, 'pen', 'penlight', 'light')) {
       if (!hasItem('pen')) {
         addItem('pen');
@@ -1340,7 +1275,6 @@ Welcome to the Guesthouse.`);
       }
       return;
     }
-    // Note on balcony
     if (room === 'balcony' && cmdIncludes(cmd, 'note', 'paper', 'message')) {
       if (!hasItem('note')) {
         addItem('note');
@@ -1355,9 +1289,6 @@ Welcome to the Guesthouse.`);
     return;
   }
 
-  // ============================================================
-  // FALLBACK
-  // ============================================================
   print(randomCant());
 }
 
@@ -1375,7 +1306,6 @@ inputEl.addEventListener('keydown', (e) => {
 // ============================================================
 // CHATROOM (Supabase)
 // ============================================================
-// TODO: Replace with your actual Supabase credentials
 const SB_URL='https://bmhbdqvjlxrifiupqrni.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtaGJkcXZqbHhyaWZpdXBxcm5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMDYzNjMsImV4cCI6MjA4Nzc4MjM2M30.HuYVHZsc_EMrKc4P1Mdn2VDoEv0oZK2-2WJYU5zxXYU';
 const SUPABASE_URL = SB_URL;
@@ -1388,7 +1318,6 @@ function enterChatroom() {
   const game = document.getElementById('game-container');
   const chat = document.getElementById('chatroom');
 
-  // Fade out the game, then fade in the chatroom
   game.classList.add('fade-out');
 
   setTimeout(() => {
@@ -1397,7 +1326,6 @@ function enterChatroom() {
 
     chat.classList.add('active');
 
-    // Allow layout to apply before fading in
     requestAnimationFrame(() => {
       chat.classList.add('visible');
     });
@@ -1407,7 +1335,6 @@ function enterChatroom() {
   }, 600);
 }
 
-// Name modal
 document.getElementById('name-submit').addEventListener('click', submitName);
 document.getElementById('name-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') submitName();
@@ -1423,22 +1350,18 @@ function submitName() {
 }
 
 async function initChat() {
-  // If Supabase credentials aren't configured, use a local-only fallback
-  if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL')) {
+  if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL') {
     addChatMessage('system', 'You solved The Cottage! Chatroom coming soon.', new Date());
     return;
   }
 
-  // Load Supabase client
   const script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
   script.onload = () => {
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Load existing messages
     loadMessages(supabase);
 
-    // Subscribe to new messages via Realtime
     chatChannel = supabase.channel('guesthouse')
       .on('postgres_changes', {
         event: 'INSERT',
@@ -1450,7 +1373,6 @@ async function initChat() {
       })
       .subscribe();
 
-    // Send message handler
     window.sendChatMessage = async (content) => {
       await supabase.from('messages').insert({
         username: chatUsername,
@@ -1482,7 +1404,6 @@ async function loadMessages(supabase) {
     });
 
   if (joinError) {
-    // If the insert fails, still show a local system message
     addChatMessage('system', `${chatUsername} has entered the Guesthouse`, new Date());
   }
 }
@@ -1526,7 +1447,6 @@ function addChatMessage(name, text, date) {
   container.scrollTop = container.scrollHeight;
 }
 
-// Chat input
 document.getElementById('chat-send').addEventListener('click', sendChat);
 document.getElementById('chat-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendChat();
@@ -1541,7 +1461,6 @@ function sendChat() {
   if (window.sendChatMessage) {
     window.sendChatMessage(text);
   } else {
-    // Fallback: local only
     addChatMessage(chatUsername, text, new Date());
   }
 }
