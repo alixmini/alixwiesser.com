@@ -1383,6 +1383,14 @@ inputEl.addEventListener('keydown', (e) => {
   }
 });
 
+document.body.addEventListener('click', () => {
+  inputEl.focus();
+}, { once: true });
+
+document.getElementById('output').addEventListener('click', () => {
+  inputEl.focus();
+});
+
 // ============================================================
 // CHATROOM (Supabase)
 // ============================================================
