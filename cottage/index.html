@@ -426,6 +426,7 @@
   <div id="game-header">
     <span>THE COTTAGE — <span class="location" id="location-display">The Great Forest</span></span>
     <span id="inventory-bar">pockets: empty</span>
+    <span id="audio-toggle" style="cursor:pointer; font-size:0.75rem; color:#f3a9c8;">♪</span>
   </div>
   <div id="output"></div>
   <div id="input-area">
@@ -462,6 +463,19 @@
 </div>
 
 <script>
+
+const ambience = new Audio('/cottage/media/guesthouse_music.mp3');
+ambience.loop = true;
+ambience.volume = 0.3;
+let audioStarted = false;
+document.addEventListener('keydown', () => {
+  if (!audioStarted) { ambience.play(); audioStarted = true; }
+}, { once: true });
+document.getElementById('audio-toggle').addEventListener('click', () => {
+  ambience.muted = !ambience.muted;
+  document.getElementById('audio-toggle').style.opacity = ambience.muted ? '0.4' : '1';
+});
+  
 // ============================================================
 // THE COTTAGE — Full Game Engine
 // ============================================================
