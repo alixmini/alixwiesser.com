@@ -59,6 +59,26 @@
     color: var(--chat-muted, #7a9185);
   }
 
+  #cat-lane {
+    height: 14px;
+    background: transparent;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  .cat {
+    position: absolute;
+    top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #7a9185;
+    white-space: nowrap;
+    user-select: none;
+    pointer-events: none;
+  }
+
   #output {
     flex: 1;
     overflow-y: auto;
@@ -428,6 +448,7 @@
     <span id="inventory-bar">pockets: empty</span>
     <span id="audio-toggle" style="cursor:pointer; font-size:0.75rem; color:#f3a9c8;">♪</span>
   </div>
+  <div id="cat-lane"></div>
   <div id="output"></div>
   <div id="input-area">
     <div id="input-row">
@@ -1564,6 +1585,107 @@ function sendChat() {
     addChatMessage(chatUsername, text, new Date());
   }
 }
+
+// ============================================================
+// CAT ANIMATION SYSTEM
+// ============================================================
+(function () {
+  const catLane = document.getElementById('cat-lane');
+  const CAT_FRAMES = {
+    normal: [' /\\_/\\  ( o.o )  > ^ <', ' /\\_/\\  ( o.o )  > v <'],
+    long: [' /\\_/\\====  ( o.o )  > ^ <', ' /\\_/\\====  ( o.o )  > v <']
+  };
+
+  const activeCats = new Set();
+  let catSpawner = null;
+
+  function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  function pickCatType() {
+    return Math.random() < 0.1 ? 'long' : 'normal';
+  }
+
+  function pickDirection() {
+    return Math.random() < 0.15 ? 'rtl' : 'ltr';
+  }
+
+  function makeCat() {
+    const type = pickCatType();
+    const frames = CAT_FRAMES[type];
+    const direction = pickDirection();
+    const duration = randomBetween(18, 28); // seconds
+    const settle = randomBetween(200, 450); // ms before starting movement
+
+    const el = document.createElement('div');
+    el.className = 'cat';
+    el.textContent = frames[0];
+    if (direction === 'rtl') el.style.transform = 'scaleX(-1)';
+
+    catLane.appendChild(el);
+
+    const laneWidth = catLane.offsetWidth;
+    const charWidth = 5.8; // approximate mono char width
+    const startX = direction === 'ltr' ? -frames[0].length * charWidth : laneWidth + frames[0].length * charWidth;
+    const endX = direction === 'ltr' ? laneWidth : -frames[0].length * charWidth;
+
+    el.style.left = startX + 'px';
+    el.style.transition = `left ${duration}s cubic-bezier(0.4, 0, 0.2, 1)`;
+
+    let frameIndex = 0;
+    const frameTicker = setInterval(() => {
+      frameIndex = (frameIndex + 1) % frames.length;
+      el.textContent = frames[frameIndex];
+    }, 350);
+
+    // Trigger the CSS transition after a short pause to feel calm
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        el.style.left = endX + 'px';
+      });
+    }, settle);
+
+    const cleanup = () => {
+      clearInterval(frameTicker);
+      el.remove();
+      activeCats.delete(cleanup);
+    };
+
+    activeCats.add(cleanup);
+
+    setTimeout(cleanup, duration * 1000 + settle + 500);
+  }
+
+  function scheduleNextCat() {
+    const delay = randomBetween(20000, 45000); // 20-45s
+    catSpawner = setTimeout(() => {
+      makeCat();
+
+      // Spawn a second cat shortly after most of the time
+      if (Math.random() < 0.8) {
+        setTimeout(makeCat, randomBetween(150, 300));
+      }
+
+      scheduleNextCat();
+    }, delay);
+  }
+
+  function start() {
+    scheduleNextCat();
+  }
+
+  function stop() {
+    if (catSpawner) {
+      clearTimeout(catSpawner);
+      catSpawner = null;
+    }
+    activeCats.forEach(fn => fn());
+  }
+
+  start();
+  window.addEventListener('beforeunload', stop);
+})();
 </script>
 </body>
 </html>
